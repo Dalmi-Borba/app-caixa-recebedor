@@ -1,0 +1,43 @@
+<form onsubmit="send()" action="/" method="POST" enctype="multipart/form-data">
+    <h3>Débito Funcionário</h3>
+    <fieldset>
+        <legend>Comprovante | Extrato</legend>
+        <input class="" type="file" id="image" name="image" required>
+    </fieldset>
+    <fieldset>
+        <legend>Favorecido</legend>
+        <input class="" type="text" id="nome" placeholder="Nome" name="nome" required>
+    </fieldset>
+    <fieldset>
+        <legend>Tipo</legend>
+        <div style="display: flex; gap: 1rem;">
+            <input type="radio" id="mat" name="mat" value="mat" required>
+            <label for="">Material</label>
+            <input type="radio" id="ins" name="mat" value="ins">
+            <label for="">Inscrição</label>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Descrição</legend>
+        <input class="" type="text" id="material" placeholder="Descrição" name="material" required>
+    </fieldset>
+
+    <fieldset>
+        <legend>Departamento</legend>
+        <%- include('deptos'); %>
+    </fieldset>
+
+    <fieldset>
+        <legend>Valor</legend>
+        <input class="" type="text" onInput="mascaraMoeda(event);" id="valor" placeholder="Valor" name="valor" required>
+    </fieldset>
+    <fieldset>
+        <legend>Observações</legend>
+        <textarea class="" id="obs" name="obs"></textarea>
+    </fieldset>
+    <br>
+    <button class="btn btn-primary shadow d-block w-100" type="submit">Enviar</button>
+
+    <input type="hidden" name="aprovacao" id="aprovacao" value="false">
+    <input type="hidden" name="tipo" id="tipo" value="func">
+</form>

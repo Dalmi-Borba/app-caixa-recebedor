@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Configurações</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/iasdfavicon.png" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f2f4f8;
+      padding: 2rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: center;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      gap: 2rem;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .config-card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+    }
+
+    .config-card h2 {
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      color: #333;
+    }
+
+    .config-card form {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .config-card input[type="text"] {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .config-card button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .config-card button:hover {
+      background-color: #004a99;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    td input[type="text"] {
+      width: 100%;
+      padding: 0.4rem;
+      font-size: 0.95rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    td button {
+      padding: 0.4rem 0.7rem;
+      font-size: 0.85rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 0.3rem;
+    }
+
+    .edit-btn {
+      background-color: #ffa500;
+      color: white;
+    }
+
+    .remove-btn {
+      background-color: #d9534f;
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      .config-card form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      td {
+        display: block;
+        width: 100%;
+      }
+
+      td button {
+        width: 48%;
+        margin-top: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="/">Home</a>
+    <a href="/view">Solicitações</a>
+    <a href="/movimentos">Movimentos</a>
+  </div>
+
+  <section class="config-card">
+    <h2>Criar Conta Bancária</h2>
+    <form action="/config" method="post">
+      <input type="text" id="conta" name="conta" placeholder="Número da Conta" required>
+      <button type="submit">Salvar</button>
+    </form>
+  </section>
+
+  <section>
+    <table>
+      <thead>
+        <tr>
+          <th>Conta</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% items.forEach(item => { %>
+          <tr>
+            <td>
+              <input type="text" name="conta" id="conta-<%= item.id %>" value="<%= item.conta %>">
+            </td>
+            <td>
+              <button class="edit-btn" onclick="editar('<%= item.id %>')">Editar</button>
+              <button class="remove-btn" onclick="remover('<%= item.id %>')">Remover</button>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </section>
+
+</body>
+<script>
+  function editar(id) {
+    alert(`Editando conta com id ${id}`);
+    fetch(`/config/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        conta: document.getElementById(`conta-${id}`).value,
+        id: id,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Conta atualizada com sucesso.');
+        } else {
+          alert('Ocorreu um erro ao atualizar a conta.');
+        }
+      });
+  }
+
+  function remover(id) {
+    if (confirm('Tem certeza que deseja remover esta conta?')) {
+      fetch(`/config/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          } else {
+            alert('Ocorreu um erro ao remover a conta.');
+          }
+        });
+    }
+  }
+</script>
+</html>

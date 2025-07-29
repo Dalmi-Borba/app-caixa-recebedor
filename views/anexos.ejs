@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Caixa ASM</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/img/iasdfavicon.png">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
+</head>
+<body style="/*background: url(&quot;design.jpg&quot;);*/background-position: 0 -60px;">
+    <nav>
+        <%- include('./partials/nav'); %>
+    </nav>
+    <header class="bg-dark pt-5"></header>
+    <section class="py-5" style="margin-top: -30px;margin-bottom: -60px;padding-bottom: 72px;">
+        <div class="container text-center py-5" style="margin-top: -35px;margin-bottom: -38px;">
+            <p class="mb-4" style="font-size: 1.6rem;"></p>
+        </div>
+    </section>
+    <section>
+        <div class="container bg-dark py-5">
+            <div class="row d-flex justify-content-center">
+                <button onclick="anexos()">Anexos</button>
+            </div>
+        </div>
+    </section>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/bold-and-dark.js"></script>
+    <script>
+        function anexos(){
+            window.location.href = 'http://191.252.101.143:3000/down';
+        }
+    </script>
+</body>
+
+</html>

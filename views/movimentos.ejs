@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Caixa ASM</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/iasdfavicon.png" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f2f4f8;
+      padding: 2rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: center;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      gap: 2rem;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    table {
+      width: 90%;
+      margin: 0 auto;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 2px solid #aaa;
+      overflow: hidden;
+      background-color: #fff;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid #aaa;
+      background-color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 0 4px;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background-color: #f0f0f0;
+    }
+
+    .link-danger {
+      color: #dc3545;
+    }
+
+    .link-primary {
+      color: #007BFF;
+    }
+
+    .link-success {
+      color: #28a745;
+    }
+
+    .link-danger:hover,
+    .link-primary:hover,
+    .link-success:hover {
+      text-decoration: underline;
+    }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-body {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: right;
+      align-items: right;
+      padding: 10px;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #888;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: #000;
+    }
+
+    .center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .arvore-lote {
+      margin: 2rem;
+    }
+
+    .lote {
+      margin-bottom: 2rem;
+    }
+
+    .lote-titulo {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lote-titulo::before {
+      content: "📂";
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="/">Home</a>
+    <a href="/view">Solicitações</a>
+    <a href="/movimentos">Movimentos</a>
+  </div>
+
+  <div class="arvore-lote">
+    <% 
+      const lotes = {};
+      items.forEach(item => {
+        if (!lotes[item.nun_lote]) lotes[item.nun_lote] = [];
+        lotes[item.nun_lote].push(item);
+      });
+    %>
+
+    <% Object.keys(lotes).forEach(lote => { %>
+      <div class="lote">
+        <div class="lote-titulo">
+          <%= lote %>
+          <form action="/lotes" method="POST">
+            <input type="text" id="lote" name="lote" value="<%= lote %>" hidden>
+            <button class="btn btn-primary shadow d-block w-100" type="submit">Baixar CSV</button>
+          </form>
+        </div>
+        <div>
+          <% lotes[lote].forEach(item => { %>
+            <table>
+                <tr>
+                  <td>Lçtos...</td>
+                  <td><%= item.nome %></td>
+                  <td><%= item.material %></td>
+                  <td><%= item.depto %></td>
+                  <td>R$ <%= item.valor %></td>
+                  <td><%= item.obs %></td>
+                  <td>
+                    <a href="#" onclick="openModal('<%= item.id %>55')" class="link-success">✏️ Editar</a>
+                  </tr>
+
+                  <!-- Modal -->
+                  <div id="<%=item.id%>55" class="modal">
+                      <div class="modal-content">
+                          <div class="modal-header center">
+                              <h3>Editar Documento</h3>
+                          </div>
+                          <div class="modal-body center">
+                              <form action="/doc" method="POST">
+                                  <label for="Lote">Lote:</label>
+                                  <input value="<%=item.nun_lote%>" type="text" id="lote" placeholder="Lote" name="lote">
+
+                                  <label for="">Data:</label>
+                                  <input value="<%=item.data%>" type="date" id="date" placeholder="Data" name="date">
+
+                                  <label for="">Conta Bancaria Recebedora:</label>
+                                  <input value="<%=item.conta%>" type="text" id="conta" placeholder="Conta Bancaria Recebedora" name="conta">
+                                  
+                                  <label for="">Favorecido:</label>
+                                  <input value="<%=item.nome%>" type="text" id="nome" placeholder="Nome" name="nome" required>
+                                  
+                                  <label for="">Descrição:</label>
+                                  <input value="<%=item.material%>" type="text" id="material" placeholder="Descrição" name="material" required>
+                                  
+                                  <label for="">Valor:</label>
+                                  <input value="<%=item.valor%>" type="text" onInput="mascaraMoeda(event);" id="valor" placeholder="Valor" name="valor" required>
+                                  
+                                  <label for="obs">Observações:</label>
+                                  <textarea id="obs" name="obs"><%=item.obs %></textarea>
+                                  
+                                  <button class="btn btn-primary shadow d-block w-100" type="submit">Enviar</button>
+                                  <input type="hidden" name="id" value="<%=item.id%>">
+                              </form>
+                          </div>
+                          <div class="modal-footer">
+                              <a onclick="closeModal('<%=item.id%>55')" class="link-danger">Fechar</a>
+                          </div>
+                      </div>
+                  </div>
+                  <!-- Close Modal -->
+            </table>
+
+          <% }) %>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+</body>
+<script>
+   function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    }
+
+    // Fecha modal ao clicar fora do conteúdo
+    window.onclick = function(event) {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = "none";
+          document.body.style.overflow = 'auto';
+        }
+      });
+    }
+
+</script>
+</html>

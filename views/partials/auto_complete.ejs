@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="auto/auto-complete.css">
+<script src="auto/auto-complete.min.js"></script>
+<script>
+    const demo2 = new autoComplete({
+    selector: '#material',
+    minChars: 1,
+    source: function (term, suggest) {
+      term = term.toLowerCase();
+      var choices = [
+      'Kit do Sabado',
+      'Tia Helenita',
+      'Aventurismo'
+      ];
+
+      var suggestions = [];
+      for (i = 0; i < choices.length; i++)
+        if (~choices[i].toLowerCase().indexOf(term)) suggestions.push(choices[i]);
+      suggest(suggestions);
+    }
+  });
+    </script>

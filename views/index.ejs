@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>Caixa ASM</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/iasdfavicon.png" />
+</head>
+<style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f2f4f8;
+      padding: 2rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: center;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      gap: 2rem;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    header {
+      background-color: #000;
+      height: 60px;
+    }
+
+    .section-top {
+      padding: 3rem 1rem;
+      text-align: center;
+    }
+
+    .section-top p {
+      font-size: 1.6rem;
+      font-weight: 500;
+    }
+
+    .section-top strong {
+      color: green;
+    }
+
+    .center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: calc(100vh - 340px); /* ajuste se necessário */
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .center h5 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .center button {
+      width: 100%;
+      max-width: 300px;
+      padding: 12px;
+      font-size: 1rem;
+      background-color: #fff;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .center button:hover {
+      background-color: #000;
+      color: #fff;
+      border: 2px solid #fff;
+    }
+  </style>
+<body>
+  <div class="navbar">
+    <a class="nav-link active" href="/">Home</a>
+    <a class="nav-link" href="/view">Solicitações</a>
+    <a class="nav-link" href="/movimentos">Movimentos</a>
+    <a class="nav-link" href="/config">Configurações</a>
+  </div>
+
+  <section class="section-top">
+    <p>
+      Solicite seu <strong>Recibo</strong> <br />
+      sem usar <strong>Papel</strong>!
+    </p>
+  </section>
+
+  <section class="center">
+    <h5>Qual o meio de pagamento?</h5>
+    <button onclick="pessoa()">Depósito | Transferência | Pix</button>
+    <button onclick="igreja()">Débito Igreja</button>
+    <button onclick="func()">Débito Funcionário</button>
+    <button onclick="caixa()">Pagamento no Caixa</button>
+  </section>
+
+  <script>
+    function pessoa() { window.location.href = "/pessoa"; }
+    function igreja() { window.location.href = "/igreja"; }
+    function func() { window.location.href = "/func"; }
+    function caixa() { window.location.href = "/caixa"; }
+  </script>
+</body>
+</html>

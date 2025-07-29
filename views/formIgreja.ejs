@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Caixa ASM</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/img/iasdfavicon.png">
+</head>
+<style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f2f4f8;
+      padding: 2rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: center;
+      background-color: #fff;
+      border: 2px solid #aaa;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      gap: 4rem;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+    }
+
+    nav {
+      background-color: #000;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    nav a {
+      color: #fff;
+      margin: 0 1rem;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    header {
+      background-color: #000;
+      height: 60px;
+    }
+
+    .section-top {
+      padding: 3rem 1rem;
+      text-align: center;
+    }
+
+    .section-top p {
+      font-size: 1.6rem;
+      font-weight: 500;
+    }
+
+    .section-top strong {
+      color: green;
+    }
+
+    .center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .center h5 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .center input {
+      width: 100%;
+      padding: 2px;
+      font-size: 1rem;
+    }
+
+    .center button {
+      width: 100%;
+      max-width: 300px;
+      padding: 12px;
+      font-size: 1rem;
+      background-color: #fff;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .center button:hover {
+      background-color: #000;
+      color: #fff;
+      border: 2px solid #fff;
+    }
+
+    fieldset {
+      width: 300px;
+      margin: 2px auto;
+      border: 2px solid black;
+      border-radius: 8px;
+      padding: 10px;
+    }
+</style>
+<body>
+    <div class="navbar">
+        <a class="nav-link active" href="/">Home</a>
+        <a class="nav-link" href="/view">Solicitações</a>
+        <a class="nav-link" href="/movimentos">Movimentos</a>
+    </div>
+    <section>
+        <div class="center">
+            <%- include('./partials/formIasd'); %>
+        </div>
+    </section>
+    <script>
+    function mascaraMoeda(event) {
+        const onlyDigits = event.target.value
+            .split("")
+            .filter(s => /\d/.test(s))
+            .join("")
+            .padStart(3, "0")
+        const digitsFloat = onlyDigits.slice(0, -2) + "." + onlyDigits.slice(-2)
+        event.target.value = maskCurrency(digitsFloat)
+        }
+
+        function maskCurrency(valor, locale = 'pt-BR', currency = 'BRL') {
+        return new Intl.NumberFormat(locale, {
+            style: 'currency',
+            currency
+        }).format(valor)
+        }
+    </script>
+    <script src="auto/auto-complete.min.js"></script>
+    <%- include('./partials/auto_complete'); %>
+    <%- include('./partials/script'); %>
+    <script>
+    const demo1 = new autoComplete({
+    selector: '#nome',
+    minChars: 1,
+    source: function (term, suggest) {
+      term = term.toLowerCase();
+      var choices = [
+      '23 Bairro Amambai',
+      '147 agua Clara',
+      '218 Bairro Santa Luzia',
+      '129 Cassilandia',
+      '332 Inocencia',
+      '120 Jair Garcia',
+      '1009 Jardim das Naçoes',
+      '215 Jardim das Oliveiras',
+      '154 Jardim Leblon',
+      '37 Monte Castelo',
+      '18 Morraria do Sul',
+      '240 Oliveira III',
+      '89 Paranapunga (Morum)bi',
+      '80 Penfigo',
+      '77 Piratininga',
+      '177 Rochedo',
+      '20 Santa Terezinha',
+      '268 Sao Francisco',
+      '138 Sumatra',
+      '1006 Tijuca I',
+      '134 Tres Lagoas',
+      '106 Bataguassu',
+      '1008 Centro Educacional - Fatima do Sul',
+      '58 Coxim',
+      '70 Ivinhema',
+      '24 Joquei Clube',
+      '71 Lagoa Bonita',
+      '109 Nova Andradina',
+      '116 Ponta Pora',
+      '62 Rio Verde',
+      '139 Vila Cidade Morena',
+      '113 Amambai',
+      '171 Anastacio',
+      '118 Aral Moreira',
+      '192 Boa Vista',
+      '48 Caarapo',
+      '9892 Cristalina',
+      '42 Cristo Redentor',
+      '197 Guanandi II',
+      '43 Itau',
+      '99 Japora',
+      '35 Jaraguari',
+      '274 Jardim Anache',
+      '198 Jardim Progresso - Navirai',
+      '186 Juti',
+      '44 Ladario',
+      '329 Luzes',
+      '9999 Oscar Salazar',
+      '101 Paranhos',
+      '45 Popular Nova',
+      '331 Sol Nascente',
+      '190 Taquaral Bosque',
+      '219 Vila Nogueira',
+      '153 Chapadao do Sul',
+      '79 Coophavilla II',
+      '1012 Jardim Gramado',
+      '244 Jardim Noroeste',
+      '21 Novo Horizonte (costa Rica)',
+      '181 P. A. Sao Pedro',
+      '31 Parque das Naçoes II',
+      '322 Santa Brigida',
+      '279 Santa Monica',
+      '1025 Sao Bento',
+      '63 Sao Gabriel D`oeste',
+      '50 Vila Almeida',
+      '308 Vila Planalto',
+      '11 Aquidauana',
+      '08 Bairro Alto',
+      '9 Bodoquena',
+      '326 Comunidade Haitiana',
+      '93 Guia Lopes Laguna',
+      '94 Jardim',
+      '17 Nova Lima II',
+      '293 Santa Emilia',
+      '203 Taveiropolis',
+      '1 Alvorada',
+      '107 Bataypora',
+      '88 Bonito',
+      '316 Centro Educacional - Nova Andradina',
+      '67 Deodapolis',
+      '285 Jardim Ivone',
+      '9890 Itamarati (ponta Pora)',
+      '208 Jardim Balsamo II',
+      '81 Jardim Centenario',
+      '9879 Flamboyant I',
+      '191 Jatei',
+      '202 Pioneiros',
+      '144 Porto Murtinho',
+      '1037 Primeira Essencia',
+      '1037 Primeira Essencia',
+      '117 Sanga Puita',
+      '155 Santa Rita do Pardo',
+      '165 sem nome',
+      '47 Viva Vida',
+      '157 Aero Rancho',
+      '320 Altos da Cidade',
+      '309 Assentamento Santo Antonio',
+      '40 Cidade Jardim',
+      '90 Colonia Conceiçao',
+      '97 Iguatemi',
+      '2 Jardim Moema',
+      '183 Monte Castelo-corumba',
+      '100 Mundo Novo',
+      '108 Navirai',
+      '330 Nova Aliança de Ladario',
+      '263 Nova Corumba',
+      '150 Silvia Regina',
+      '103 Tacuru',
+      '324 Aldeia Lagoa Rica',
+      '287 Assentamento Alambari',
+      '259 Assentamento do Sete',
+      '261 Bairro Progresso',
+      '55 Bandeirantes',
+      '307 Caioba II',
+      '39 Jardim Guaicurus',
+      '28 Jardim Guanabara',
+      '210 Portal Caioba',
+      '7 Ribas do Rio Pardo',
+      '86 Sidrolandia',
+      '95 Vila Juquita',
+      '206 Vila Kellen',
+      '64 Vila Nunes',
+      '33 Vila Vargas',
+      '180 Zé Pereira',
+      '133 Parque Uniao',
+      '140 Jardim Interlagos',
+      '141 Jardim Eldorado',
+      '125 Vila Popular',
+      '236 Vila Santana',
+      '148 Coopha Fronteira ',
+      '34 Central CG',
+      '333 Arapua',
+      '207 Bairro Industrial de Lourdes',
+      '201 Bairro Santa Carmélia',
+      '218 Bairro Santa Luzia',
+      '22 Bairro Taquarussu',
+      '87 Bela Vista',
+      '115 Cabeceira do Apa',
+      '10 Camisao',
+      '129 Cassilandia',
+      '13 Colonia Canaa',
+      '82 Jardim Corcovado',
+      '121 Jardim Imperial',
+      '222 Jardim Mondego',
+      '12 Miranda',
+      '299 Nova Esperança - Bela Vista',
+      '132 Paranaiba',
+      '312 Portal da Lagoa',
+      '84 Sao Conrado',
+      '257 Sao Luiz',
+      '235 Uniao',
+      '78 Vila Jacy',
+      '175 Vila Margarida',
+      '112 Bairro Sao Vicente',
+      '128 Brasilandia',
+      '92 Campo Nobre',
+      '75 Cohab',
+      '15 Fetagre',
+      '69 Gloria de Dourados',
+      '83 Jardim los Angeles',
+      '291 Jardim Sao Francisco- Bataguassu',
+      '158 Jardim Vitoria',
+      '136 Marechal Rondon',
+      '4 Moreninha II',
+      '187 Moreninha IV',
+      '146 Nioaque',
+      '256 Parque dos Ipes',
+      '1018 Paulo Coelho Machado',
+      '179 Rincao Bonito',
+      '142 Sonora',
+      '997 Triguina',
+      '72 Vicentina',
+      '38 Aeroporto - Corumba',
+      '212 Assentamento Santa Guilhermina',
+      '237 Bethaville',
+      '169 Coronel Sapucaia',
+      '96 Eldorado',
+      '211 Floresta Branca',
+      '46 Jardim Campanario',
+      '315 Jardim das Hortencias',
+      '122 Jardim Nova Lima',
+      '254 Jardim Paraiso',
+      '9883 Palmeiras',
+      '130 Pantanal',
+      '123 Santo Amaro',
+      '102 Sete Quedas',
+      '9990 Taquaral',
+      '29 Vila Nova',
+      '9891 Alcinopolis',
+      '288 Assentamento Eldorado',
+      '26 Cabeceira Alegre',
+      '56 Camapua',
+      '250 Canaa III',
+      '193 Capao Bonito II',
+      '57 Costa Rica',
+      '51 Itapora',
+      '217 Jardim Aeroporto',
+      '85 Jardim Batistao',
+      '53 Jardim Florida',
+      '220 Jardim Morada do Sol - Costa Rica',
+      '19 Parque do Lago II',
+      '248 Maracana',
+      '59 Paraiso',
+      '174 Prudencio Thomaz',
+      '32 Rio Brilhante',
+      '61 Rio Negro',
+      '5 Tiradentes',
+      '104 AMFFI',
+      '145 Itahum',
+      '114 Antonio Joao',
+      '126 Aparecida do Taboado',
+      '310 Aquarius II',
+      '74 Caiçara',
+      '195 Caracol',
+      '209 Jardim Campo Belo',
+      '1021 Jussara',
+      '1013 Nova Vida',
+      '306 Parque Sao Carlos',
+      '124 Vila Nasser',
+      '247 Alves Pereira',
+      '105 Anaurilandia',
+      '65 Angélica',
+      '173 Anhandui',
+      '258 Chacara das Mansoes',
+      '66 Culturama',
+      '68 Fatima do Sul',
+      '1033 Granja',
+      '233 Guanabara- N.andradina',
+      '231 Morada do Sol- Nova Andradina',
+      '243 Nova Porto XV',
+      '311 P.a.teijin',
+      '188 Parque do Sol',
+      '60 Pedro Gomes',
+      '14 Piracema',
+      '300 Rio Verde II',
+      '111 Taquarussu- N. Andradina',
+      '1011 Vista do Lago',
+      '276 Assentamento Sul Bonito',
+      '214 Assentamento Uirapuru',
+      '41 Corumba',
+      '76 Guanandi',
+      '156 Guanandi Sul',
+      '98 Itaquirai',
+      '262 Jardim Carioca',
+      '290 Jardim Columbia',
+      '135 Jardim Itamaraca',
+      '36 Mata do Jacinto',
+      '183 Monte Castelo-corumba',
+      '110 Novo Horizonte do Sul (Ivinhema)',
+      '25 Terenos',
+      '6 Universitaria',
+      '251 Vila Paseto',
+      '16 Dois Irmaos do Buriti',
+      '27 Douradina',
+      '49 Dourados - Central',
+      '328 Geraldo Garcia',
+      '52 Jardim agua Boa',
+      '325 Joao Batista',
+      '54 Maracaju',
+      '3 Maria Aparecida Pedrossian',
+      '30 Nova Alvorada do Sul',
+      '323 Pro Moradia XV',
+      '238 Rancharia',
+      '91 Vila Nova - Rio Brilhante',
+      '127 Sete Sul',
+      '149 Parque Alvorada',
+      '151 Sal da Terra',
+      '152 Jardim Santo Andre',
+      '160 Comunidade agape',
+      '176 Jardim América',
+      '168 Piraputanga',
+      '172 Vila Pernambuco',
+      '166 Vila Ferreira',
+      '164 Vila Planalto II',
+      '167 Estrela',
+      '162 Salgado Filho',
+      '178 Itapoa',
+      '327 Aldeia de Lagoinha',
+      ];
+
+      var suggestions = [];
+      for (i = 0; i < choices.length; i++)
+        if (~choices[i].toLowerCase().indexOf(term)) suggestions.push(choices[i]);
+      suggest(suggestions);
+    }
+  });
+    </script>
+</body>
+
+</html>

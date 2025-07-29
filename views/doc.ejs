@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Caixa ASM</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/img/iasdfavicon.png">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
+</head>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+* {
+    font-family: 'Open Sans', sans-serif;
+}
+
+p {
+    color: #000;
+}
+
+.content {
+    margin: 0 auto;
+    max-width: 900px;
+    background-color: #eee;
+    padding: 10px;
+}
+
+.modal {
+    background-color: rgba(0, 0, 0, .8);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+}
+
+.modal-content {
+    margin: 0 auto;
+    margin-top: 3%;
+    max-width: 600px;
+    background-color: #eee;
+    padding: 0;
+    box-shadow: 0 0 2px #fff;
+}
+
+.modal-header, .modal-body, .modal-footer{
+    padding: 5px;
+}
+
+.modal-header{
+    background-color: #ccc;
+}
+
+.modal-footer{
+    background-color: #ccc;
+}
+</style>
+<body style="/*background: url(&quot;design.jpg&quot;);*/background-position: 0 -60px;">
+    <nav>
+        <%- include('./partials/nav'); %>
+    </nav>
+    <header class="bg-dark pt-5"></header>
+    <section class="py-5" style="margin-top: -30px;margin-bottom: -60px;padding-bottom: 72px;">
+        <div class="container text-center py-5" style="margin-top: -35px;margin-bottom: -38px;">
+            <p class="mb-4" style="font-size: 1.6rem;"></p>
+        </div>
+    </section>
+    <section>
+        <div class="container bg-dark py-5">
+            <div class="row d-flex justify-content-center">
+                <div class="col-md-6 col-xl-4">
+                    <div>
+                            <div class="card shadow-sm">
+                                <h6>Certeza que deseja apagar?</h6>
+                                <span><%= items.nome%></span>
+                                <span><%= items.material%></span>
+                                <span><%= items.depto%></span>
+                                <span><%= items.valor%></span>
+                                <span><%= items.obs%></span>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/bold-and-dark.js"></script>
+<script>
+    function openModal(mn) {
+    let modal = document.getElementById(mn);
+
+    if (typeof modal == 'undefined' || modal === null)
+        return;
+
+    modal.style.display = 'Block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(mn) {
+    let modal = document.getElementById(mn);
+
+    if (typeof modal == 'undefined' || modal === null)
+        return;
+
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function del(data){
+    const url = `http://localhost:3000/delete/${data}`
+
+    fetch(url)
+    .then(document.location.reload(true))
+
+}
+</script>
+</body>
+
+</html>

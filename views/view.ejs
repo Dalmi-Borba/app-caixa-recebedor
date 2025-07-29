@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Caixa ASM</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/iasdfavicon.png" />
+  <style>
+        * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f2f4f8;
+      padding: 2rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: center;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      gap: 2rem;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    table {
+      width: 90%;
+      margin: 0 auto;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 2px solid #aaa;
+      border-radius: 15px;
+      overflow: hidden;
+      background-color: #fff;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid #aaa;
+      background-color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 0 4px;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background-color: #f0f0f0;
+    }
+
+    .link-danger {
+      color: #dc3545;
+    }
+
+    .link-primary {
+      color: #007BFF;
+    }
+
+    .link-success {
+      color: #28a745;
+    }
+
+    .link-danger:hover,
+    .link-primary:hover,
+    .link-success:hover {
+      text-decoration: underline;
+    }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-body {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: right;
+      align-items: right;
+      padding: 10px;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #888;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: #000;
+    }
+
+    .center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    input[type="text"] {
+      width: 150px;
+      padding: 0.4rem;
+      font-size: 0.95rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a class="nav-link active" href="/">Home</a>
+    <a class="nav-link" href="/view">Solicitações</a>
+    <a class="nav-link" href="/movimentos">Movimentos</a>
+  </div>
+
+  <div class="center">
+    <form action="/lotes-new" method="POST">
+      <input type="text" id="lote" name="lote" placeholder="Nome do Lote" required>
+      <label for="checkAll" id="checkAllLabel">Marcar todos</label>
+      <input type="checkbox" id="checkAll" name="checkAll" value="">
+      <input type="text" id="checkinput" name="checkinput" value="" hidden required>
+      <button class="btn" type="submit">Cria lote</button>
+    </form>
+  </div>
+    <br>
+  <table>
+      <tr>
+        <th>Lote</th>
+        <th>Data</th>
+        <th>Nome</th>
+        <th>Descrição</th>
+        <th>Depto</th>
+        <th>Valor</th>
+        <th>Obs</th>
+        <th>Ações</th>
+      </tr>
+    <% items.forEach(function(image) { %>
+      <tr>
+        <td><%= image.nun_lote %></td>
+        <td><%= image.data %></td>
+        <td><%= image.nome %></td>
+        <td><%= image.material %></td>
+        <td><%= image.depto %></td>
+        <td><%= image.valor %></td>
+        <td><%= image.obs %></td>
+        <td>
+          <% if (image.tipo === "caixa") { %>
+            <a href="/del/<%= image.id %>" class="link-danger">🗑 Excluir</a>
+            <a href="#" onclick="openModal('<%= image.id %>55')" class="link-success">✏️ Editar</a>
+          <% } else { %>
+            <a href="#" onclick="openModal('<%= image.id %>')" class="link-primary">📎 Anexo</a>
+            <a href="/delete/<%= image.id %>" class="link-danger">🗑 Excluir</a>
+            <a href="#" onclick="openModal('<%= image.id %>55')" class="link-success">✏️ Editar</a>
+          <% } %>
+          <input type="checkbox" id="<%= image.id %>check" name="checkItem">
+        </td>
+      </tr>
+
+       <!-- Modal -->
+        <div id="<%=image.id%>" class="modal">
+            <div class="modal-content">
+                <div class="modal-header center">
+                    <p>Nome: <%= image.nome %></p>
+                </div>
+                <div class="modal-body">
+                    <object data="uploads/<%=image.img.name%>.pdf" type="application/pdf" width="450px" height="550px">
+                        <embed src="uploads/<%=image.img.name%>.pdf" type="application/pdf">
+                            <p>This browser does not support PDFs. Please download the PDF to view it: 
+                            <a href="uploads/<%=image.img.name%>.pdf">Download PDF</a>.</p>
+                        </embed>
+                    </object>
+                </div>
+                <div class="modal-footer">
+                    <a onclick="closeModal('<%=image.id%>')" class="link-danger">Fechar</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="<%=image.id%>55" class="modal">
+            <div class="modal-content">
+                <div class="modal-header center">
+                    <h3>Editar Documento</h3>
+                </div>
+                <div class="modal-body center">
+                    <form action="/doc" method="POST">
+                        <label for="Lote">Lote:</label>
+                        <input value="<%=image.nun_lote%>" type="text" id="lote" placeholder="Lote" name="lote" required>
+
+                        <label for="">Data:</label>
+                        <input value="<%=image.data%>" type="date" id="date" placeholder="Data" name="date" required>
+
+                        <label for="">Conta Bancaria Recebedora:</label>
+                        <input value="<%=image.conta%>" type="text" id="conta" placeholder="Conta Bancaria Recebedora" name="conta">
+                        
+                        <label for="">Nome:</label>
+                        <input value="<%=image.nome%>" type="text" id="nome" placeholder="Nome" name="nome" required>
+                        
+                        <label for="">Descrição:</label>
+                        <input value="<%=image.material%>" type="text" id="material" placeholder="Descrição" name="material" required>
+                        
+                        <label for="">Valor:</label>
+                        <input value="<%=image.valor%>" type="text" onInput="mascaraMoeda(event);" id="valor" placeholder="Valor" name="valor" required>
+                        
+                        <label for="obs">Observações:</label>
+                        <textarea id="obs" name="obs"><%= image.obs %></textarea>
+                        
+                        <button class="btn btn-primary shadow d-block w-100" type="submit">Enviar</button>
+                        <input type="hidden" name="id" value="<%=image.id%>">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a onclick="closeModal('<%=image.id%>55')" class="link-danger">Fechar</a>
+                </div>
+            </div>
+        </div>
+        <!-- Close Modal -->
+    <% }) %>
+  </table>
+
+<script>
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    }
+
+    // Fecha modal ao clicar fora do conteúdo
+    window.onclick = function(event) {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = "none";
+          document.body.style.overflow = 'auto';
+        }
+      });
+    }
+
+  //Função única para atualizar os IDs marcados
+  function atualizarCheckInput() {
+    const marcados = Array.from(document.querySelectorAll("input[type=checkbox][name=checkItem]:checked"))
+      .map(cb => cb.id.replace("check", "")); // ou cb.value
+    document.getElementById("checkinput").value = marcados.join(",");
+    console.log("IDs marcados:", marcados);
+  }
+
+  //Marcar/Desmarcar todos os checkboxes
+  document.getElementById("checkAll").addEventListener("change", function () {
+    const checkboxes = document.querySelectorAll("input[type=checkbox][name=checkItem]");
+    checkboxes.forEach(cb => cb.checked = this.checked);
+    document.getElementById("checkAllLabel").innerText = this.checked ? "Desmarcar todos" : "Marcar todos";
+    atualizarCheckInput();
+  });
+
+  //Um único listener para qualquer mudança em checkbox individual
+  document.addEventListener("change", function(event) {
+    if (event.target.name === "checkItem") {
+      atualizarCheckInput();
+    }
+  });
+
+</script>
+</body>
+</html>
