@@ -235,19 +235,45 @@
         <div id="<%=image.id%>55" class="modal">
             <div class="modal-content">
                 <div class="modal-header center">
-                    <h3>Editar Documento</h3>
+                    <h3><%= image.flag %></h3>
                 </div>
                 <div class="modal-body center">
                     <form action="/doc" method="POST">
                         <label for="Lote">Lote:</label>
                         <input value="<%=image.nun_lote%>" type="text" id="lote" placeholder="Lote" name="lote" required>
 
-                        <label for="">Data:</label>
-                        <input value="<%=image.data%>" type="date" id="date" placeholder="Data" name="date" required>
+                        <!-- se for transferência || cartão -->
+                         <% if (image.flag === "Depósito, Transferência ou PIX" || image.tipo === "cartao") { %>
+                              <label for="">Data:</label>
+                              <input value="<%=image.data%>" type="date" id="date" placeholder="Data" name="date" required>
+                         <% } %>
+                        <!-- se for transferência -->
+                         <% if (image.flag === "Depósito, Transferência ou PIX") { %>
+                              <label for="">Conta Bancaria Recebedora:</label>
+                              <input value="<%=image.conta%>" type="text" id="conta" placeholder="Conta Bancaria Recebedora" name="conta">
+                         <% } %>
 
-                        <label for="">Conta Bancaria Recebedora:</label>
-                        <input value="<%=image.conta%>" type="text" id="conta" placeholder="Conta Bancaria Recebedora" name="conta">
-                        
+                        <!-- se for cartao -->
+                         <% if (image.tipo === "cartao") { %>
+                              <label for="">Vda:</label>
+                              <input value="<%=image.vda%>" type="text" id="vda" placeholder="Vda" name="vda">
+
+                              <label for="">Número da Parcela:</label>
+                              <input value="<%=image.nun_parcela%>" type="text" id="nun_parcela" placeholder="Número da Parcela" name="nun_parcela">
+
+                              <label for="">Tipo de Cartão:</label>
+                              <select name="tipo_cartao" id="tipo_cartao" required>
+                                  <% if (image.tipo_cartao === "credito") { %>
+                                      <option value="credito" selected>Crédito</option>
+                                      <option value="debito">Débito</option>
+                                  <% } %>
+                                  <% if (image.tipo_cartao === "debito") { %>
+                                      <option value="credito" selected>Crédito</option>
+                                      <option value="debito">Débito</option>
+                                  <% } %>
+                              </select>
+                         <% } %>
+
                         <label for="">Nome:</label>
                         <input value="<%=image.nome%>" type="text" id="nome" placeholder="Nome" name="nome" required>
                         
