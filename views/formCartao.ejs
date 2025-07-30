@@ -133,7 +133,7 @@
 
     <section>
         <div class="center">
-            <%- include('./partials/formPessoa'); %>
+            <%- include('./partials/formCartao'); %>
         </div>
     </section>
     
@@ -154,6 +154,33 @@
             currency
         }).format(valor)
         }
+
+        document.getElementById("debito").addEventListener("change", function () {
+            if (this.checked) {
+                document.getElementById("nun_parcela").remove();
+                document.getElementById("label-nun-parcela").remove();
+            }
+        });
+
+        document.getElementById("credito").addEventListener("change", function () {
+            if (this.checked) {
+                if (!document.getElementById("nun_parcela")) {
+                  const input = document.createElement("input");
+                  input.type = "number";
+                  input.id = "nun_parcela";
+                  input.name = "nun_parcela";
+
+                  const label = document.createElement("label");
+                  label.htmlFor = "nun_parcela";
+                  label.id = "label-nun-parcela";
+                  label.textContent = "Número de Parcelas:";
+
+                  const container = document.getElementById("container-parcela") || document.body;
+                  container.appendChild(label);
+                  container.appendChild(input);
+                }
+            }
+        }); 
     </script>
 
     <%- include('./partials/auto_complete'); %>

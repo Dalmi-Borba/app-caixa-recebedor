@@ -1,5 +1,6 @@
 const imgModel = require('../models/model');
 const bancModel = require('../models/config_banc');
+const descModel = require('../models/config_descricao');
 const convert = require('../convert');
 const delete_js = require('../delete_js');
 const zipjs = require('../zip_js')
@@ -43,29 +44,31 @@ exports.renderAnexos = function(req, res){
     zipjs(req.params.id);
 };
 
-exports.renderFormPessoa = async function(req, res){
-    //get all contas banc
-    await bancModel.find().exec(function(err, items){
-        if (err) {
-            console.log(err);
-            res.status(500).send('An error occurred', err);
-        }
-        else {
-            res.render('formPessoa.ejs', { items: items }); 
-        }
-    });
+exports.renderFormPessoa = async function(req, res){    
+    const banc = await bancModel.find().exec();
+    const desc = await descModel.find().exec();
+
+    res.render('formPessoa.ejs', { contas: banc, desc: desc });
 };
 
-exports.renderFormIgreja = function(req, res){
-    res.render('formIgreja.ejs'); 
+exports.renderFormCartao = async function(req, res){
+    const desc = await descModel.find().exec();
+    res.render('formCartao.ejs', { desc: desc });
 };
 
-exports.renderFormFunc = function(req, res){
-    res.render('formFunc.ejs'); 
+exports.renderFormIgreja = async function(req, res){
+    const desc = await descModel.find().exec();
+    res.render('formIgreja.ejs', { desc: desc });
 };
 
-exports.renderFormCaixa = function(req, res){
-    res.render('formCaixa.ejs'); 
+exports.renderFormFunc = async function(req, res){
+    const desc = await descModel.find().exec();
+    res.render('formFunc.ejs', { desc: desc });
+};
+
+exports.renderFormCaixa = async function(req, res){
+    const desc = await descModel.find().exec();
+    res.render('formCaixa.ejs', { desc: desc });
 };
 
 exports.renderIndex = function(req, res){
@@ -141,6 +144,7 @@ exports.getAprovados = async function(req, res){
 
 
 exports.postImage = async function(req, res, next){
+
     var obj = {
         nome: req.body.nome,
         material: req.body.material,
@@ -152,6 +156,10 @@ exports.postImage = async function(req, res, next){
         obs: req.body.obs,
         aprovacao: req.body.aprovacao,
         conta: req.body.conta,
+        vda: req.body.vda,
+        nun_parcela: req.body.nun_parcela,
+        tipo_cartao: req.body.tipo_cartao,
+        flag: req.body.flag,
         img: {
             name: req.file.filename,
             //data: fs.readFileSync(path.join('/home/dalmi/Documentos/projetos/multer/uploads/' + req.file.filename)),
@@ -178,6 +186,7 @@ exports.postCaixa = async function(req, res, next){
         depto: req.body.depto,
         valor: req.body.valor,
         obs: req.body.obs,
+        flag: req.body.flag,
     }
     imgModel.create(obj, (err, item) => {
         if (err) {
@@ -238,56 +247,3 @@ exports.renderDoc = async function(req, res) {
 };
 
 
-exports.renderConfig = async function(req, res){
-    //get all contas banc
-    await bancModel.find().exec(function(err, items){
-        if (err) {
-            console.log(err);
-            res.status(500).send('An error occurred', err);
-        }
-        else {
-            res.render('config.ejs', { items: items }); 
-        }
-    });
-};
-
-
-exports.postConfig = async function(req, res){
-    // insert conta bancModel
-    const obj = {
-        conta: req.body.conta,
-    }
-    await bancModel.create(obj, (err, item) => {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            // item.save();
-            res.redirect('/config');
-        }
-    });
-    
-};
-
-
-exports.updateConfig = async function(req, res) {
-    if(!req.body.id) return res.render('404');
-    if(!req.body.conta) return res.render('404');
-
-    const obj = {
-        conta: req.body.conta,
-    }
-
-    await bancModel.findByIdAndUpdate(req.body.id, obj);
-    
-    res.redirect('/config');
-};
-
-exports.deleteConfig = async function(req, res) {
-    if(!req.params.id) return res.render('404');
- 
-    const doc = await bancModel.findByIdAndRemove({ _id: req.params.id});
-    if(!doc) return res.render('404');
-
-    res.redirect('/config');
-};

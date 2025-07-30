@@ -16,7 +16,14 @@
     </fieldset>
     <fieldset>
         <legend>Descrição</legend>
-        <input class="" type="text" id="material" placeholder="Descrição" name="material" required>
+        <select name="material" id="material" required>
+            <option value=""></option>
+            <% desc.forEach(item => { %>
+            <option value="<%= item.desc %>">
+                <%= item.desc %>
+            </option>
+            <% }) %>
+        </select>
     </fieldset>
 
     <fieldset>
@@ -37,4 +44,5 @@
 
     <input type="hidden" name="aprovacao" id="aprovacao" value="false">
     <input type="hidden" name="tipo" id="tipo" value="caixa">
+    <input type="hidden" name="flag" id="flag" value="Pagamento no Caixa">
 </form>

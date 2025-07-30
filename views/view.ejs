@@ -180,6 +180,7 @@
   <table>
       <tr>
         <th>Lote</th>
+        <th>Tipo Lçto</th>
         <th>Data</th>
         <th>Nome</th>
         <th>Descrição</th>
@@ -191,6 +192,7 @@
     <% items.forEach(function(image) { %>
       <tr>
         <td><%= image.nun_lote %></td>
+        <td><%= image.flag %></td>
         <td><%= image.data %></td>
         <td><%= image.nome %></td>
         <td><%= image.material %></td>

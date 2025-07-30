@@ -12,6 +12,10 @@ var imageSchema = new mongoose.Schema({
     obs: String,
     nun_lote: String,
     conta: String,
+    vda: String,
+    nun_parcela: String,
+    tipo_cartao: String,
+    flag: String,
     img:
     {
         name: String,

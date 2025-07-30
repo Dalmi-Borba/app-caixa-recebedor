@@ -1,0 +1,74 @@
+<section class="config-card">
+    <h2>Criar Conta Bancária</h2>
+    <form action="/config-banc" method="post">
+      <input type="text" id="conta" name="conta" placeholder="Número da Conta" required>
+      <button type="submit">Salvar</button>
+    </form>
+  </section>
+
+  <section>
+    <table>
+      <thead>
+        <tr>
+          <th>Conta</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% contas.forEach(item => { %>
+          <tr>
+            <td>
+              <input type="text" name="conta" id="conta-<%= item.id %>" value="<%= item.conta %>">
+            </td>
+            <td>
+              <button class="edit-btn" onclick="editar('<%= item.id %>')">Editar</button>
+              <button class="remove-btn" onclick="remover('<%= item.id %>')">Remover</button>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </section>
+
+<script>
+  function editar(id) {
+    fetch(`/config-banc/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        conta: document.getElementById(`conta-${id}`).value,
+        id: id,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Conta atualizada com sucesso.');
+          location.reload();
+        } else {
+          alert('Ocorreu um erro ao atualizar a conta.');
+        }
+      });
+  }
+
+  function remover(id) {
+    if (confirm('Tem certeza que deseja remover esta conta?')) {
+      fetch(`/config-banc/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          } else {
+            alert('Ocorreu um erro ao remover a conta.');
+          }
+        });
+    }
+  }
+</script>

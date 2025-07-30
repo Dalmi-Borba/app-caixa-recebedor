@@ -126,15 +126,33 @@
         const valor = limparValor(image.valor);
         const matIns = image.mat_ins === "mat" ? "Almox." : "Inscricao";
         //if ternario para se haver data, e converter de aaaa-mm-dd para dd/mm/yyyy
-        const data = image.data ? image.data.split("-").reverse().join("/") : "";
+        var data = image.data ? image.data.split("-").reverse().join("/") : "";
         const conta_bancaria = image.conta ? image.conta : "";
 
         if (image.tipo === "iasd") {
           textoFinal += `1139090;22;10;0000;0A;${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
           textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+        } else if (image.tipo === "cartao") {
+          //-----------------------------------------------------------------------------------------------------------------
+            if (image.tipo_cartao === "credito") {
+                let avista_parcelado = image.nun_parcela === '1' || image.nun_parcela === '0' ? 'A Vista' : 'Parcelas';
+                let parc = image.nun_parcela === '1' || image.nun_parcela === '0' ? '' : image.nun_parcela;
+                textoFinal += `2164025;1001;10;0000;0A;${valor};N;"Vda ${image.vda} - ${data} - ${parc} ${avista_parcelado}";;;"";;\n`;
+                textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+            } else {
+                textoFinal += `2164025;1001;10;0000;0A;${valor};N;"Vda ${image.vda} - ${data} -  A Vista";;;"";;\n`;
+                textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+            }
+          //---------------------------------------------------------------------------------------------------------------
+        } else if (image.tipo === "func") {
+            textoFinal += `1135001;[CODIGO FUNCIONARIO];10;0000;0A;${valor};N;"Adto. ${mes}/${ano} - ${nome}";;;"";;\n`;
+            textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+        } else if (image.tipo === "caixa") {
+            textoFinal += `1111025;;10;0000;0A;${valor};N;"Deposito a Efetuar - ${mes}/${ano}";;;"";;\n`;
+            textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
         } else {
-          textoFinal += `1112001;${conta_bancaria};10;0000;0A;${valor};N;"Transferencia Pix ${data} - ${nome}";;;"";;\n`;
-          textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+            textoFinal += `1112001;${conta_bancaria};10;0000;0A;${valor};N;"Transferencia Pix ${data} - ${nome}";;;"";;\n`;
+            textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
         }
       });
 

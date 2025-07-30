@@ -1,5 +1,5 @@
 <form onsubmit="send()" action="/" method="POST" enctype="multipart/form-data">
-    <h3>Depósito, Transferência ou PIX</h3>
+    <h3>Cartão de Crédito ou Débito</h3>
     <fieldset>
         <legend>Comprovante | Extrato</legend>
         <input class="" type="file" id="image" name="image" required>
@@ -13,13 +13,21 @@
         <input type="date" id="date" name="date" required>
     </fieldset>
     <fieldset>
-        <legend>Conta Bancaria Recebedora</legend>
+        <legend>Sobre o Ticket do Cartão</legend>
     <!-- render items in select -->
-        <select name="conta" id="conta" required>
-            <% contas.forEach(item => { %>
-                <option value="<%= item.conta %>"><%= item.conta %></option>
-            <% }); %>
-        </select>
+        <div style="display: flex; gap: 1rem;">
+        <input type="radio" id="credito" name="tipo_cartao" value="credito">
+        <label for="">Crédito</label>
+        <input type="radio" id="debito" name="tipo_cartao" value="debito">
+        <label for="">Débito</label>
+        </div>
+        <br>
+        <div id="container-parcela">
+            <label for="">Codido do Cartão (VDA)</label>
+            <input type="vda" id="vda" name="vda" required>
+            <label for="" id="label-nun-parcela">Número da Parcelas</label>
+            <input type="nun_parcela" id="nun_parcela" name="nun_parcela">
+        </div>
     </fieldset>
     <fieldset>
         <legend>Tipo</legend>
@@ -32,7 +40,6 @@
     </fieldset>
     <fieldset>
         <legend>Descrição</legend>
-
         <select name="material" id="material" required>
             <option value=""></option>
             <% desc.forEach(item => { %>
@@ -60,6 +67,6 @@
     <button class="btn btn-primary shadow d-block w-100" type="submit">Enviar</button>
 
     <input type="hidden" name="aprovacao" id="aprovacao" value="false">
-    <input type="hidden" name="tipo" id="tipo" value="pessoa">
-    <input type="hidden" name="flag" id="flag" value="Depósito, Transferência ou PIX">
+    <input type="hidden" name="tipo" id="tipo" value="cartao">
+    <input type="hidden" name="flag" id="flag" value="Cartão de Crédito ou Débito">
 </form>

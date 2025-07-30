@@ -1,0 +1,74 @@
+<section class="config-card">
+    <h2>Criar Descrição</h2>
+    <form action="/config-desc" method="post">
+      <input type="text" id="desc" name="desc" placeholder="Descrição" required>
+      <button type="submit">Salvar</button>
+    </form>
+  </section>
+
+  <section>
+    <table>
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% desc.forEach(item => { %>
+          <tr>
+            <td>
+              <input type="text" name="desc" id="desc-<%= item.id %>" value="<%= item.desc %>">
+            </td>
+            <td>
+              <button class="edit-btn" onclick="editar('<%= item.id %>')">Editar</button>
+              <button class="remove-btn" onclick="remover('<%= item.id %>')">Remover</button>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </section>
+
+<script>
+  function editar(id) {
+    fetch(`/config-desc/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        desc: document.getElementById(`desc-${id}`).value,
+        id: id,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Descrição atualizada com sucesso.');
+          location.reload();
+        } else {
+          alert('Ocorreu um erro ao atualizar a descrição.');
+        }
+      });
+  }
+
+  function remover(id) {
+    if (confirm('Tem certeza que deseja remover esta conta?')) {
+      fetch(`/config-desc/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          } else {
+            alert('Ocorreu um erro ao remover a descrição.');
+          }
+        });
+    }
+  }
+</script>
