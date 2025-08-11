@@ -7,6 +7,7 @@ var imageSchema = new mongoose.Schema({
     mat_ins: String,
     material: String,
     depto: String,
+    nome_depto: String,
     valor: String,
     data: String,
     obs: String,

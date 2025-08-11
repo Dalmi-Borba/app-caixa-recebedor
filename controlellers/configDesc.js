@@ -31,10 +31,17 @@ exports.updateConfig = async function(req, res) {
 };
 
 exports.deleteConfig = async function(req, res) {
-    if(!req.params.id) return res.render('404');
- 
-    const doc = await descModel.findByIdAndRemove({ _id: req.params.id});
-    if(!doc) return res.render('404');
+  if (!req.params.id) return res.status(400).json({ success: false, message: 'ID não informado.' });
 
-    res.redirect('/config');
+  try {
+    const doc = await descModel.findByIdAndRemove({ _id: req.params.id });
+
+    if (!doc) return res.status(404).json({ success: false, message: 'Descrição não encontrada.' });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erro interno.' });
+  }
 };

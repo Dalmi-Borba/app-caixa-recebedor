@@ -7,6 +7,8 @@ const loteController = require('./controlellers/loteController');
 const mergeController = require('./controlellers/mergeController');
 const configBancController = require('./controlellers/configBanc');
 const configDescController = require('./controlellers/configDesc');
+const filtroController = require('./controlellers/filtros');
+const configDeptoController = require('./controlellers/configDepto');
 //const updateController = require('./controlellers/updateController');
 
 route.get('/down', uploadController.renderDown);
@@ -39,8 +41,20 @@ route.post('/config-desc', configDescController.postConfig);
 route.put('/config-desc/:id', configDescController.updateConfig);
 route.delete('/config-desc/:id', configDescController.deleteConfig);
 
+//config-depto
+route.post('/config-depto', configDeptoController.postConfig);
+route.put('/config-depto/:id', configDeptoController.updateConfig);
+route.delete('/config-depto/:id', configDeptoController.deleteConfig);
+
+//movimentos
 route.get('/movimentos', loteController.renderLotes);
+route.post('/lotes-remove/:id', loteController.removeItemLotes);
+
 route.post('/lotes-new', loteController.postLote);
+
+//filtros
+route.get('/filtrar', filtroController.renderFiltros);
+route.post('/filtrar', filtroController.postFiltros);
 
 //merge pdf
 route.post('/merge', mergeController.merge_pdf);

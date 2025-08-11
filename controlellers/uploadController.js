@@ -1,6 +1,7 @@
 const imgModel = require('../models/model');
 const bancModel = require('../models/config_banc');
 const descModel = require('../models/config_descricao');
+const deptoModel = require('../models/config_depto');
 const convert = require('../convert');
 const delete_js = require('../delete_js');
 const zipjs = require('../zip_js')
@@ -47,28 +48,37 @@ exports.renderAnexos = function(req, res){
 exports.renderFormPessoa = async function(req, res){    
     const banc = await bancModel.find().exec();
     const desc = await descModel.find().exec();
+    const depto = await deptoModel.find().exec();
 
-    res.render('formPessoa.ejs', { contas: banc, desc: desc });
+    res.render('formPessoa.ejs', { contas: banc, desc: desc, depto });
 };
 
 exports.renderFormCartao = async function(req, res){
     const desc = await descModel.find().exec();
-    res.render('formCartao.ejs', { desc: desc });
+    const depto = await deptoModel.find().exec();
+
+    res.render('formCartao.ejs', { desc: desc, depto });
 };
 
 exports.renderFormIgreja = async function(req, res){
     const desc = await descModel.find().exec();
-    res.render('formIgreja.ejs', { desc: desc });
+    const depto = await deptoModel.find().exec();
+
+    res.render('formIgreja.ejs', { desc: desc, depto });
 };
 
 exports.renderFormFunc = async function(req, res){
     const desc = await descModel.find().exec();
-    res.render('formFunc.ejs', { desc: desc });
+    const depto = await deptoModel.find().exec();
+
+    res.render('formFunc.ejs', { desc: desc, depto });
 };
 
 exports.renderFormCaixa = async function(req, res){
     const desc = await descModel.find().exec();
-    res.render('formCaixa.ejs', { desc: desc });
+    const depto = await deptoModel.find().exec();
+
+    res.render('formCaixa.ejs', { desc: desc, depto });
 };
 
 exports.renderIndex = function(req, res){
@@ -76,6 +86,7 @@ exports.renderIndex = function(req, res){
 };
 
 exports.getRec = async function(req, res) {
+    const depto = await deptoModel.find().exec();
     try {
         const items = await imgModel.find({
             $or: [
@@ -85,7 +96,7 @@ exports.getRec = async function(req, res) {
             ]
         }).sort({ nome: 1 }).exec();
 
-        res.render('view.ejs', { items });
+        res.render('view.ejs', { items, depto });
     } catch (err) {
         console.error(err);
         res.status(500).send('Ocorreu um erro ao buscar os dados.');
@@ -145,12 +156,16 @@ exports.getAprovados = async function(req, res){
 
 exports.postImage = async function(req, res, next){
 
+    const nun_depto = req.body.depto.split(' - ')[0];
+    const nome_depto = req.body.depto.split(' - ')[1];
+
     var obj = {
         nome: req.body.nome,
         material: req.body.material,
         mat_ins: req.body.mat,
         tipo: req.body.tipo,
-        depto: req.body.depto,
+        depto: nun_depto,
+        nome_depto: nome_depto,
         valor: req.body.valor,
         data: req.body.date,
         obs: req.body.obs,
@@ -178,12 +193,17 @@ exports.postImage = async function(req, res, next){
 };
 
 exports.postCaixa = async function(req, res, next){
+
+    const nun_depto = req.body.depto.split(' - ')[0];
+    const nome_depto = req.body.depto.split(' - ')[1];
+
     var obj = {
         nome: req.body.nome,
         material: req.body.material,
         mat_ins: req.body.mat,
         tipo: req.body.tipo,
-        depto: req.body.depto,
+        depto: nun_depto,
+        nome_depto: nome_depto,
         valor: req.body.valor,
         obs: req.body.obs,
         flag: req.body.flag,
@@ -236,6 +256,10 @@ exports.renderDoc = async function(req, res) {
         material: req.body.material,
         depto: req.body.depto,
         valor: req.body.valor,
+        data: req.body.date,
+        vda: req.body.vda,
+        nun_parcela: req.body.nun_parcela,
+        tipo_cartao: req.body.tipo_cartao,
         obs: req.body.obs,
     }
 

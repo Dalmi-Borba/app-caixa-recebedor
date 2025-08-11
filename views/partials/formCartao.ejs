@@ -52,7 +52,12 @@
 
     <fieldset>
         <legend>Departamento</legend>
-        <%- include('deptos'); %>
+            <select name="depto" id="depto" required>
+                <option value=""></option>
+                <% depto.forEach(item => { %>
+                <option value="<%= item.nun_depto %> - <%= item.nome_depto %>"><%= item.nome_depto %></option>
+                <% }) %>
+            </select>
     </fieldset>
 
     <fieldset>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>Caixa ASM</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/iasdfavicon.png" />
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+    body { background-color: #f2f4f8; padding: 2rem; }
+
+    .navbar { display: flex; justify-content: center; background-color: #fff; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 2rem; padding: 1rem; gap: 2rem; }
+    .navbar a { text-decoration: none; color: #333; font-weight: 500; }
+
+    .center { text-align: center; }
+    .btn { padding: 0.5rem 1rem; border: 2px solid #aaa; background-color: white; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 0 4px; }
+    input[type="text"], input[type="date"] { width: 150px; padding: 0.4rem; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 5px; margin: 2px; }
+
+    /* tabela com borda */
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table { width: 95%; margin: 0 auto 2rem; border-collapse: collapse; background: #fff; }
+    thead th { background: #f0f2f5; font-weight: 700; text-align: left; border: 1px solid #bbb; padding: 8px; }
+    tbody td { border: 1px solid #bbb; padding: 8px; }
+    tbody tr:nth-child(even) { background: #fafafa; }
+    tbody tr:hover { background: #f3f7ff; }
+    .acoes a { margin-right: 8px; text-decoration: none; }
+    .link-danger { color: #c62828; }
+    .link-success { color: #2e7d32; }
+    .link-primary { color: #1565c0; }
+    .empty { text-align: center; padding: 1rem; color: #666; }
+
+    /* --- MODAL igual ao da outra página --- */
+    .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%;
+      overflow: auto; background-color: rgba(0,0,0,0.4); }
+    .modal-content { background-color: #fff; margin: 3% auto; padding: 20px; border-radius: 10px; width: 90%; max-width: 520px;
+      position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+    .modal-header { display:flex; justify-content:center; }
+    .modal-body { display:flex; justify-content:center; align-items:center; }
+    .modal-footer { display:flex; justify-content:flex-end; padding-top:10px; }
+    .close-btn, .link-danger { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a class="nav-link active" href="/">Home</a>
+    <a class="nav-link" href="/view">Solicitações</a>
+    <a class="nav-link" href="/movimentos">Movimentos</a>
+    <a class="nav-link" href="/config">Configurações</a>
+  </div>
+
+  <div class="center"><h3>Filtros</h3></div>
+  <br>
+
+  <form class="center" action="/filtrar" method="POST">
+    <input type="text" id="lote" name="lote" placeholder="Nome do Lote">
+    <input type="text" id="flag" name="flag" placeholder="Tipo Lçto">
+    <input type="date" id="data" name="data" placeholder="Data">
+    <input type="text" id="nome" name="nome" placeholder="Nome">
+    <input type="text" id="material" name="material" placeholder="Descrição">
+    <input type="text" id="depto" name="depto" placeholder="Depto">
+    <input type="text" id="valor" name="valor" placeholder="Valor">
+    <input type="text" id="obs" name="obs" placeholder="Obs">
+    <button class="btn" type="submit">Filtrar</button>
+  </form>
+
+  <br>
+  <div class="center"><h3>Resultado da busca</h3></div>
+  <br>
+
+  <div class="table-wrap">
+    <table id="tabela">
+      <thead>
+        <tr>
+          <th>Lote</th>
+          <th>Tipo Lçto</th>
+          <th>Data</th>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Depto</th>
+          <th>Valor</th>
+          <th>Obs</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (items && items.length) { %>
+          <% items.forEach(function(image) { %>
+            <tr>
+              <td><%= image.nun_lote %></td>
+              <td><%= image.flag %></td>
+              <td><%= image.data %></td>
+              <td><%= image.nome %></td>
+              <td><%= image.material %></td>
+              <td><%= image.depto %> - <%= image.nome_depto %></td>
+              <td><%= image.valor %></td>
+              <td><%= image.obs %></td>
+              <td class="acoes">
+                <% if (image.img && image.img.name) { %>
+                  <a href="#" onclick="openModal('<%= image.id %>')" class="link-primary">📎 Anexo</a>
+                <% } %>
+              </td>
+            </tr>
+
+            <!-- Modal de anexo (mesmo padrão da outra página) -->
+            <% if (image.img && image.img.name) { %>
+              <div id="<%= image.id %>" class="modal">
+                <div class="modal-content">
+                  <div class="modal-header center">
+                    <p>Nome: <%= image.nome %></p>
+                  </div>
+                  <div class="modal-body">
+                    <object data="uploads/<%= image.img.name %>.pdf" type="application/pdf" width="450px" height="550px">
+                      <embed src="uploads/<%= image.img.name %>.pdf" type="application/pdf">
+                        <p>Seu navegador não suporta PDF. Baixe o arquivo:
+                          <a href="uploads/<%= image.img.name %>.pdf" download>Download PDF</a>.
+                        </p>
+                      </embed>
+                    </object>
+                  </div>
+                  <div class="modal-footer">
+                    <a onclick="closeModal('<%= image.id %>')" class="link-danger">Fechar</a>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+
+            <!-- Modal de edição (se você tiver) -->
+            <div id="<%= image.id %>55" class="modal">
+              <div class="modal-content">
+                <div class="modal-header center">
+                  <h3><%= image.tipo_lcto %></h3>
+                </div>
+                <div class="modal-body center">
+                  <!-- seu formulário de edição aqui -->
+                  <p>Edite os dados deste lançamento…</p>
+                </div>
+                <div class="modal-footer">
+                  <a onclick="closeModal('<%= image.id %>55')" class="link-danger">Fechar</a>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <tr><td class="empty" colspan="9">Nenhum registro encontrado com os filtros informados.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    }
+    // fechar clicando fora
+    window.addEventListener('click', function (e) {
+      document.querySelectorAll('.modal').forEach(m => {
+        if (e.target === m) { m.style.display = 'none'; document.body.style.overflow = 'auto'; }
+      });
+    });
+  </script>
+</body>
+</html>

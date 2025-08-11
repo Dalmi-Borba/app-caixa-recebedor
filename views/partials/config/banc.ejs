@@ -21,8 +21,8 @@
               <input type="text" name="conta" id="conta-<%= item.id %>" value="<%= item.conta %>">
             </td>
             <td>
-              <button class="edit-btn" onclick="editar('<%= item.id %>')">Editar</button>
-              <button class="remove-btn" onclick="remover('<%= item.id %>')">Remover</button>
+              <button class="edit-btn" onclick="editar_banc('<%= item.id %>')">Editar</button>
+              <button class="remove-btn" onclick="remover_banc('<%= item.id %>')">Remover</button>
             </td>
           </tr>
         <% }); %>
@@ -31,7 +31,7 @@
   </section>
 
 <script>
-  function editar(id) {
+  function editar_banc(id) {
     fetch(`/config-banc/${id}`, {
       method: 'PUT',
       headers: {
@@ -53,7 +53,7 @@
       });
   }
 
-  function remover(id) {
+  function remover_banc(id) {
     if (confirm('Tem certeza que deseja remover esta conta?')) {
       fetch(`/config-banc/${id}`, {
         method: 'DELETE',
@@ -62,8 +62,8 @@
         },
       })
         .then(response => response.json())
-        .then(data => {
-          if (data.success) {
+        .then(response => {
+          if (response.success) {
             location.reload();
           } else {
             alert('Ocorreu um erro ao remover a conta.');

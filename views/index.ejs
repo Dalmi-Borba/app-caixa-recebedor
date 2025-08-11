@@ -93,6 +93,7 @@
     <a class="nav-link active" href="/">Home</a>
     <a class="nav-link" href="/view">Solicitações</a>
     <a class="nav-link" href="/movimentos">Movimentos</a>
+    <a class="nav-link" href="/filtrar">Filtros</a>
     <a class="nav-link" href="/config">Configurações</a>
   </div>
 
@@ -120,4 +121,18 @@
     function caixa() { window.location.href = "/caixa"; }
   </script>
 </body>
+<script>
+async function carregarUsuario() {
+  const r = await fetch('/cdn-cgi/access/get-identity');
+  if (r.status === 200) {
+    const user = await r.json();
+    console.log(user); // { email, name, picture, ... }
+    document.getElementById('user').textContent = user.name || user.email;
+  } else if (r.status === 403) {
+    // não autenticado -> manda para o login do Access
+    window.location.href = '/cdn-cgi/access/login';
+  }
+}
+carregarUsuario();
+</script>
 </html>

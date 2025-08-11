@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
   <title>Caixa ASM</title>
-  <link rel="icon" type="image/png" sizes="512x512" href="assets/img/iasdfavicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/iasdfavicon.png">
   <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&display=swap">
   <style>
@@ -45,6 +45,7 @@
     <a href="/">Home</a>
     <a href="/view">Solicitações</a>
     <a href="/movimentos">Movimentos</a>
+    <a class="nav-link" href="/filtrar">Filtros</a>
   </div>
 
   <section>
@@ -61,7 +62,7 @@
 
     <br>
 
-    <%  
+    <%
       let names_files = '';
       items.forEach(image => {
         const name = image?.img?.name;
@@ -89,11 +90,13 @@
   <script src="assets/js/jquery.min.js"></script>
   <script src="assets/bootstrap/js/bootstrap.min.js"></script>
   <script src="assets/js/bold-and-dark.js"></script>
+
+  <!-- FileSaver (inalterado) -->
   <script>
-    // FileSaver
     (function(a,b){if("function"==typeof define&&define.amd)define([],b);else if("undefined"!=typeof exports)b();else{b(),a.FileSaver={exports:{}}.exports}})(this,function(){"use strict";function b(a,b){return"undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(a,b,c){var d=new XMLHttpRequest;d.open("GET",a),d.responseType="blob",d.onload=function(){g(d.response,b,c)},d.onerror=function(){console.error("could not download file")},d.send()}function d(a){var b=new XMLHttpRequest;b.open("HEAD",a,!1);try{b.send()}catch(a){}return 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"))}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b)}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof global&&global.global===global?global:void 0,a=/Macintosh/.test(navigator.userAgent)&&/AppleWebKit/.test(navigator.userAgent)&&!/Safari/.test(navigator.userAgent),g=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype&&!a?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href)},4E4),setTimeout(function(){e(j)},0))}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else{var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i)})}}:function(b,d,e,g){if(g=g||open("","_blank"),g&&(g.document.title=g.document.body.innerText="downloading..."),"string"==typeof b)return c(b,d,e);var h="application/octet-stream"===b.type,i=/constructor/i.test(f.HTMLElement)||f.safari,j=/CriOS\/[\d]+/.test(navigator.userAgent);if((j||h&&i||a)&&"undefined"!=typeof FileReader){var k=new FileReader;k.onloadend=function(){var a=k.result;a=j?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),g?g.location.href=a:location=a,g=null},k.readAsDataURL(b)}else{var l=f.URL||f.webkitURL,m=l.createObjectURL(b);g?g.location=m:location.href=m,g=null,setTimeout(function(){l.revokeObjectURL(m)},4E4)}});f.saveAs=g.saveAs=g,"undefined"!=typeof module&&(module.exports=g)});
   </script>
 
+  <!-- Geração do CSV com suporte a múltiplos valores **e múltiplas datas** -->
   <script>
     function salvar() {
       let texto = document.getElementById("texto").value;
@@ -102,7 +105,6 @@
       saveAs(blob, titulo + ".csv");
     }
 
-    // Gerar dinamicamente o conteúdo no textarea
     (function gerarTexto() {
       const items = <%- JSON.stringify(items) %>;
       var hoje = new Date();
@@ -110,50 +112,115 @@
       var mes = (hoje.getMonth() + 1).toString().padStart(2, '0');
       var dia = hoje.getDate().toString().padStart(2, '0');
 
-      function sanitize(str) {
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      // ===== Helpers =====
+      function sanitize(str = "") {
+        return String(str).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       }
 
-      function limparValor(valor) {
-        return valor.replace(/\s/g, '').replace('.', '').replace(',', '').replace('R$', '');
+      // Mantém apenas dígitos -> centavos. "R$ 1.234,56" => "123456"
+      function limparValorParaCentavos(v) {
+        const soDigitos = String(v).replace(/[^\d]/g, "");
+        return soDigitos || "0";
       }
+
+      // Aceita array, string com ';' ou único valor -> array de strings (valores)
+      function normalizarValores(valor) {
+        if (Array.isArray(valor)) {
+          return valor
+            .flatMap(v => String(v).split(";"))
+            .map(v => v.trim())
+            .filter(Boolean);
+        }
+        if (typeof valor === "string") {
+          return valor
+            .split(";")
+            .map(v => v.trim())
+            .filter(Boolean);
+        }
+        return [];
+      }
+
+      // Aceita array, string com ';' ou única -> array de strings (datas ISO yyyy-mm-dd)
+      function normalizarDatas(data) {
+        if (Array.isArray(data)) {
+          return data
+            .flatMap(d => String(d).split(";"))
+            .map(d => d.trim())
+            .filter(Boolean);
+        }
+        if (typeof data === "string") {
+          return data
+            .split(";")
+            .map(d => d.trim())
+            .filter(Boolean);
+        }
+        return [];
+      }
+
+      function dataBR(yyyy_mm_dd = "") {
+        if (!yyyy_mm_dd) return "";
+        const d = String(yyyy_mm_dd).slice(0, 10);
+        const [y, m, d2] = d.split("-");
+        if (!y || !m || !d2) return "";
+        return `${d2}/${m}/${y}`;
+      }
+      // =====================
 
       let textoFinal = "145111;União Centro Oeste Brasileira da I.A.S.D.\n";
 
       items.forEach(image => {
         const nome = sanitize(image.nome);
         const material = sanitize(image.material);
-        const valor = limparValor(image.valor);
         const matIns = image.mat_ins === "mat" ? "Almox." : "Inscricao";
-        //if ternario para se haver data, e converter de aaaa-mm-dd para dd/mm/yyyy
-        var data = image.data ? image.data.split("-").reverse().join("/") : "";
         const conta_bancaria = image.conta ? image.conta : "";
 
-        if (image.tipo === "iasd") {
-          textoFinal += `1139090;22;10;0000;0A;${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-          textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-        } else if (image.tipo === "cartao") {
-          //-----------------------------------------------------------------------------------------------------------------
+        const valoresBrutos = normalizarValores(image.valor);
+        const datasBrutas   = normalizarDatas(image.data);
+
+        if (valoresBrutos.length === 0) return;
+
+        // Função para pegar a data correspondente ao índice do valor.
+        // Regra: se houver só 1 data, replica pra todos; se houver várias, usa a do mesmo índice;
+        // se faltar alguma posição, usa a última disponível.
+        function dataPorIndice(i) {
+          if (datasBrutas.length === 0) return "";                            // sem data -> vazio
+          if (datasBrutas.length === 1) return datasBrutas[0];                 // 1 data -> aplica em todos
+          return datasBrutas[i] || datasBrutas[datasBrutas.length - 1];        // fallback última
+        }
+
+        valoresBrutos.forEach((valorStr, i) => {
+          const valor = limparValorParaCentavos(valorStr); // em centavos, sem sinal
+          const dataLinhaBR = dataBR(dataPorIndice(i));    // dd/mm/yyyy
+
+          if (image.tipo === "iasd") {
+            textoFinal += `1139090;22;10;0000;0A;${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+            textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+
+          } else if (image.tipo === "cartao") {
             if (image.tipo_cartao === "credito") {
-                let avista_parcelado = image.nun_parcela === '1' || image.nun_parcela === '0' ? 'A Vista' : 'Parcelas';
-                let parc = image.nun_parcela === '1' || image.nun_parcela === '0' ? '' : image.nun_parcela;
-                textoFinal += `2164025;1001;10;0000;0A;${valor};N;"Vda ${image.vda} - ${data} - ${parc} ${avista_parcelado}";;;"";;\n`;
-                textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+              let avista_parcelado = (image.nun_parcela === '1' || image.nun_parcela === '0') ? 'A Vista' : 'Parcelas';
+              let parc = (image.nun_parcela === '1' || image.nun_parcela === '0') ? '' : image.nun_parcela;
+              textoFinal += `2164025;1001;10;0000;0A;${valor};N;"Vda ${image.vda} - ${dataLinhaBR} - ${parc} ${avista_parcelado}";;;"";;\n`;
+              textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
             } else {
-                textoFinal += `2164025;1001;10;0000;0A;${valor};N;"Vda ${image.vda} - ${data} -  A Vista";;;"";;\n`;
-                textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+              textoFinal += `2164025;1001;10;0000;0A;${valor};N;"Vda ${image.vda} - ${dataLinhaBR} -  A Vista";;;"";;\n`;
+              textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
             }
-          //---------------------------------------------------------------------------------------------------------------
-        } else if (image.tipo === "func") {
+
+          } else if (image.tipo === "func") {
             textoFinal += `1135001;[CODIGO FUNCIONARIO];10;0000;0A;${valor};N;"Adto. ${mes}/${ano} - ${nome}";;;"";;\n`;
             textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-        } else if (image.tipo === "caixa") {
+
+          } else if (image.tipo === "caixa") {
             textoFinal += `1111025;;10;0000;0A;${valor};N;"Deposito a Efetuar - ${mes}/${ano}";;;"";;\n`;
             textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-        } else {
-            textoFinal += `1112001;${conta_bancaria};10;0000;0A;${valor};N;"Transferencia Pix ${data} - ${nome}";;;"";;\n`;
+
+          } else {
+            // Depósito/Transferência/PIX: usa a data por índice
+            textoFinal += `1112001;${conta_bancaria};10;0000;0A;${valor};N;"Transferencia Pix ${dataLinhaBR} - ${nome}";;;"";;\n`;
             textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-        }
+          }
+        });
       });
 
       document.getElementById("texto").value = textoFinal;

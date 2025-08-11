@@ -1,11 +1,13 @@
 const bancModel = require('../models/config_banc');
 const descModel = require('../models/config_descricao');
+const deptoModel = require('../models/config_depto');
 
 exports.renderConfig = async function(req, res){
  // get all desc e banc
    const banc = await bancModel.find().exec();
    const desc = await descModel.find().exec();
-   res.render('config.ejs', { contas: banc, desc: desc });
+   const depto = await deptoModel.find().exec();
+   res.render('config.ejs', { contas: banc, desc: desc, depto: depto });
 };
 
 
@@ -41,10 +43,17 @@ exports.updateConfig = async function(req, res) {
 };
 
 exports.deleteConfig = async function(req, res) {
-    if(!req.params.id) return res.render('404');
- 
-    const doc = await bancModel.findByIdAndRemove({ _id: req.params.id});
-    if(!doc) return res.render('404');
+  if (!req.params.id) return res.status(400).json({ success: false, message: 'ID não informado.' });
 
-    res.redirect('/config');
+  try {
+    const doc = await bancModel.findByIdAndRemove({ _id: req.params.id });
+
+    if (!doc) return res.status(404).json({ success: false, message: 'Conta não encontrada.' });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Erro interno.' });
+  }
 };

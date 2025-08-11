@@ -4,159 +4,97 @@
   <meta charset="UTF-8" />
   <title>Caixa ASM</title>
   <link rel="icon" type="image/png" sizes="16x16" href="assets/img/iasdfavicon.png" />
+  <!-- html2canvas para capturar o ticket -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <style>
-        * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+    body { background-color: #f2f4f8; padding: 2rem; }
+    .navbar { display: flex; justify-content: center; background-color: #fff; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 2rem; padding: 1rem; gap: 2rem; }
+    .navbar a { text-decoration: none; color: #333; font-weight: 500; }
 
-    body {
-      background-color: #f2f4f8;
-      padding: 2rem;
-    }
+    table { width: 90%; margin: 0 auto; border-collapse: separate; border-spacing: 0;
+      border: 2px solid #aaa; border-radius: 15px; overflow: hidden; background-color: #fff; }
+    th, td { padding: 1rem; text-align: center; border-bottom: 1px solid #ddd; }
+    tr:last-child td { border-bottom: none; }
 
-    .navbar {
-      display: flex;
-      justify-content: center;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      margin-bottom: 2rem;
-      padding: 1rem;
-      gap: 2rem;
-    }
-
-    .navbar a {
-      text-decoration: none;
-      color: #333;
-      font-weight: 500;
-    }
-
-    table {
-      width: 90%;
-      margin: 0 auto;
-      border-collapse: separate;
-      border-spacing: 0;
-      border: 2px solid #aaa;
-      border-radius: 15px;
-      overflow: hidden;
-      background-color: #fff;
-    }
-
-    th, td {
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    .btn {
-      padding: 0.5rem 1rem;
-      border: 2px solid #aaa;
-      background-color: white;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 0 4px;
-    }
-
-    a {
-      text-decoration: none;
-    }
-
-    .btn:hover {
-      background-color: #f0f0f0;
-    }
-
-    .link-danger {
-      color: #dc3545;
-    }
-
-    .link-primary {
-      color: #007BFF;
-    }
-
-    .link-success {
-      color: #28a745;
-    }
-
-    .link-danger:hover,
-    .link-primary:hover,
-    .link-success:hover {
-      text-decoration: underline;
-    }
+    .btn { padding: 0.5rem 1rem; border: 2px solid #aaa; background-color: white; border-radius: 8px;
+      cursor: pointer; font-weight: bold; margin: 0 4px; }
+    a { text-decoration: none; }
+    .btn:hover { background-color: #f0f0f0; }
+    .link-danger { color: #dc3545; }
+    .link-primary { color: #007BFF; }
+    .link-success { color: #28a745; }
+    .link-secondary { color:#444; }
+    .link-danger:hover, .link-primary:hover, .link-success:hover, .link-secondary:hover { text-decoration: underline; }
 
     /* MODAL */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-    }
+    .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%;
+      overflow: auto; background-color: rgba(0,0,0,0.4); }
+    .modal-body { display: flex; justify-content: center; flex-direction: column; align-items: center; gap: 6px; }
+    .modal-content { background-color: #fff; margin: 10% auto; padding: 20px; border-radius: 10px; width: 90%; max-width: 520px;
+      position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+    .modal-footer { display: flex; justify-content: right; align-items: right; padding: 10px; }
+    .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; font-weight: bold; color: #888; cursor: pointer; }
+    .close-btn:hover { color: #000; }
 
-    .modal-body {
-      display: flex;
-      justify-content: center;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
+    .center { display: flex; justify-content: center; align-items: center; gap: 1rem; }
+    input[type="text"] { width: 150px; padding: 0.4rem; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 5px; }
 
-    .modal-content {
-      background-color: #fff;
-      margin: 10% auto;
-      padding: 20px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 500px;
-      position: relative;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
+    .valores-container { width: 100%; }
+    .valor-item { display: grid; grid-template-columns: auto 1fr auto 1fr auto; gap: .5rem; align-items: center; margin-bottom: .5rem; }
+    .valor-item label { font-size: .9rem; justify-self: end; }
 
-    .modal-footer {
-      display: flex;
-      justify-content: right;
-      align-items: right;
-      padding: 10px;
-    }
+    /* Filtros no header */
+    thead .filters th { padding: .5rem; border-bottom: 1px solid #eee; background: #fafafa; }
+    thead .filters input[type="text"] { width: 100%; padding: .35rem .5rem; border: 1px solid #ccc; border-radius: 6px; font-size: .9rem; }
+    thead .filters .disabled { background: #f7f7f7; border: none; }
 
-    .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 20px;
-      font-weight: bold;
-      color: #888;
-      cursor: pointer;
-    }
+    /* Indicador de ordenação */
+    th.sortable { cursor: pointer; user-select: none; position: relative; }
+    th.sortable::after { content: '⇅'; position: absolute; right: .5rem; opacity: .35; font-size: .9rem; }
+    th.sort-asc::after  { content: '↑'; opacity: .7; }
+    th.sort-desc::after { content: '↓'; opacity: .7; }
 
-    .close-btn:hover {
-      color: #000;
+    /* ===== Ticket (recibo) ===== */
+    .ticket{
+      width: 320px; background:#fff; border:2px solid #c9ced6; border-radius:18px;
+      padding:14px; box-shadow:0 6px 18px rgba(0,0,0,.06); font-size:14px; color:#222;
     }
-
-    .center {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem;
+    .ticket .brand{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .ticket .logo{ width:40px; height:40px; border:2px solid #111; border-radius:8px;
+      display:grid; place-items:center; font-weight:800; }
+    .ticket .addr{ font-size:12px; color:#666; line-height:1.2; }
+    .ticket .title{ text-align:center; font-weight:700; letter-spacing:.08em; margin:8px 0 4px; }
+    .ticket .sub{ text-align:center; font-size:11px; color:#666; }
+    .ticket .sep{ margin:10px 0; border-top:1px dashed #c9ced6; }
+    .ticket .row{ display:flex; justify-content:space-between; gap:10px; margin:4px 0; }
+    .ticket .label{ color:#666; width:45%; }
+    .ticket .value{ font-weight:600; text-align:right; width:55%; }
+    .ticket .box{ border:1px dashed #d3d7de; border-radius:10px; padding:10px; margin-top:6px; }
+    .ticket .box h4{ margin:0 0 6px; font-size:12px; color:#333; text-transform:uppercase; letter-spacing:.05em; }
+    .ticket table{ width:100%; border-collapse:collapse; font-size:12px; }
+    .ticket th, .ticket td{ padding:6px 4px; }
+    .ticket thead th{ text-align:left; font-weight:700; border-bottom:1px dashed #c9ced6; color:#333; }
+    .ticket td.qty, .ticket td.price, .ticket td.total{ text-align:right; white-space:nowrap; }
+    .ticket tfoot td{ border-top:1px dashed #c9ced6; font-weight:700; }
+    .ticket .paid{ text-align:center; font-weight:800; margin-top:6px; }
+    .ticket .barcode{
+      height:60px; margin:8px auto 0; width:92%;
+      background: repeating-linear-gradient(90deg, #000 0, #000 2px, transparent 2px, transparent 4px);
+      border-radius:4px; position:relative;
     }
+    .ticket .barcode small{
+      position:absolute; left:0; right:0; bottom:-18px;
+      text-align:center; letter-spacing:.2em; font-size:12px; color:#333;
+    }
+    .ticket .sign{ margin-top:18px; text-align:center; color:#666; font-size:12px; }
+    .ticket .sign .line{ border-top:1px solid #c9ced6; width:70%; margin:26px auto 6px; }
 
-    input[type="text"] {
-      width: 150px;
-      padding: 0.4rem;
-      font-size: 0.95rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+    /* Renderiza o ticket fora da tela (mas visível) para o html2canvas */
+    #ticketCanvas {
+      position: fixed; left: -10000px; top: 0; z-index: -1; /* offscreen */
     }
   </style>
 </head>
@@ -165,6 +103,7 @@
     <a class="nav-link active" href="/">Home</a>
     <a class="nav-link" href="/view">Solicitações</a>
     <a class="nav-link" href="/movimentos">Movimentos</a>
+    <a class="nav-link" href="/filtrar">Filtros</a>
   </div>
 
   <div class="center">
@@ -176,180 +115,439 @@
       <button class="btn" type="submit">Cria lote</button>
     </form>
   </div>
-    <br>
-  <table>
+  <br>
+
+  <table id="tabela">
+    <thead>
       <tr>
-        <th>Lote</th>
-        <th>Tipo Lçto</th>
-        <th>Data</th>
-        <th>Nome</th>
-        <th>Descrição</th>
-        <th>Depto</th>
-        <th>Valor</th>
-        <th>Obs</th>
+        <th class="sortable">Tipo Lçto</th>
+        <th class="sortable">Data</th>
+        <th class="sortable">Nome</th>
+        <th class="sortable">Descrição</th>
+        <th class="sortable">Depto</th>
+        <th class="sortable">Valor</th>
+        <th class="sortable">Obs</th>
         <th>Ações</th>
       </tr>
-    <% items.forEach(function(image) { %>
-      <tr>
-        <td><%= image.nun_lote %></td>
-        <td><%= image.flag %></td>
-        <td><%= image.data %></td>
-        <td><%= image.nome %></td>
-        <td><%= image.material %></td>
-        <td><%= image.depto %></td>
-        <td><%= image.valor %></td>
-        <td><%= image.obs %></td>
-        <td>
-          <% if (image.tipo === "caixa") { %>
-            <a href="/del/<%= image.id %>" class="link-danger">🗑 Excluir</a>
-            <a href="#" onclick="openModal('<%= image.id %>55')" class="link-success">✏️ Editar</a>
-          <% } else { %>
-            <a href="#" onclick="openModal('<%= image.id %>')" class="link-primary">📎 Anexo</a>
-            <a href="/delete/<%= image.id %>" class="link-danger">🗑 Excluir</a>
-            <a href="#" onclick="openModal('<%= image.id %>55')" class="link-success">✏️ Editar</a>
-          <% } %>
-          <input type="checkbox" id="<%= image.id %>check" name="checkItem">
-        </td>
+      <tr class="filters">
+        <th><input type="text" placeholder="Filtrar Tipo"></th>
+        <th><input type="date" placeholder="Filtrar Data"></th>
+        <th><input type="text" placeholder="Filtrar Nome"></th>
+        <th><input type="text" placeholder="Filtrar Descrição"></th>
+        <th><input type="text" placeholder="Filtrar Depto"></th>
+        <th><input type="text" placeholder="Filtrar Valor"></th>
+        <th><input type="text" placeholder="Filtrar Obs"></th>
       </tr>
+    </thead>
 
-       <!-- Modal -->
+    <tbody>
+      <% items.forEach(function(image) { %>
+        <tr>
+          <td><%= image.flag %></td>
+          <td><%= image.data %></td>
+          <td><%= image.nome %></td>
+          <td><%= image.material %></td>
+          <td><%= image.nome_depto %></td>
+          <td><%= image.valor %></td>
+          <td><%= image.obs %></td>
+          <td>
+            <% if (image.tipo === "caixa") { %>
+              <a href="/del/<%= image.id %>" class="link-danger">🗑 Excluir</a>
+              <a href="#" onclick="openModal('<%= image.id %>55')" class="link-success">✏️ Editar</a>
+            <% } else { %>
+              <a href="#" onclick="openModal('<%= image.id %>')" class="link-primary">📎 Anexo</a>
+              <a href="/delete/<%= image.id %>" class="link-danger">🗑 Excluir</a>
+              <a href="#" onclick="openModal('<%= image.id %>55')" class="link-success">✏️ Editar</a>
+            <% } %>
+
+            <!-- Botão RECIBO com dados em data-* -->
+            <a href="#"
+               onclick="baixarRecibo(this)"
+               class="link-secondary"
+               data-id="<%= image.id %>"
+               data-lote="<%= image.nun_lote %>"
+               data-flag="<%= image.flag %>"
+               data-data="<%= image.data %>"
+               data-nome="<%= image.nome %>"
+               data-material="<%= image.material %>"
+               data-depto="<%= image.depto %>"
+               data-valor="<%= Array.isArray(image.valor) ? image.valor.join('; ') : (image.valor||'') %>"
+               data-obs="<%= (image.obs||'').replace(/\"/g,'&quot;') %>">🧾 Recibo</a>
+
+            <input type="checkbox" id="<%= image.id %>check" name="checkItem">
+          </td>
+        </tr>
+
+        <!-- Modal de anexo -->
         <div id="<%=image.id%>" class="modal">
-            <div class="modal-content">
-                <div class="modal-header center">
-                    <p>Nome: <%= image.nome %></p>
-                </div>
-                <div class="modal-body">
-                    <object data="uploads/<%=image.img.name%>.pdf" type="application/pdf" width="450px" height="550px">
-                        <embed src="uploads/<%=image.img.name%>.pdf" type="application/pdf">
-                            <p>This browser does not support PDFs. Please download the PDF to view it: 
-                            <a href="uploads/<%=image.img.name%>.pdf">Download PDF</a>.</p>
-                        </embed>
-                    </object>
-                </div>
-                <div class="modal-footer">
-                    <a onclick="closeModal('<%=image.id%>')" class="link-danger">Fechar</a>
-                </div>
+          <div class="modal-content">
+            <div class="modal-header center">
+              <p>Nome: <%= image.nome %></p>
             </div>
+            <div class="modal-body">
+              <object data="uploads/<%=image.img.name%>.pdf" type="application/pdf" width="450px" height="550px">
+                <embed src="uploads/<%=image.img.name%>.pdf" type="application/pdf">
+                  <p>Seu navegador não suporta PDF. Baixe o arquivo:
+                    <a href="uploads/<%=image.img.name%>.pdf">Download PDF</a>.
+                  </p>
+                </embed>
+              </object>
+            </div>
+            <div class="modal-footer">
+              <a onclick="closeModal('<%=image.id%>')" class="link-danger">Fechar</a>
+            </div>
+          </div>
         </div>
 
+        <!-- Modal de edição -->
         <div id="<%=image.id%>55" class="modal">
-            <div class="modal-content">
-                <div class="modal-header center">
-                    <h3><%= image.flag %></h3>
-                </div>
-                <div class="modal-body center">
-                    <form action="/doc" method="POST">
-                        <label for="Lote">Lote:</label>
-                        <input value="<%=image.nun_lote%>" type="text" id="lote" placeholder="Lote" name="lote" required>
-
-                        <!-- se for transferência || cartão -->
-                         <% if (image.flag === "Depósito, Transferência ou PIX" || image.tipo === "cartao") { %>
-                              <label for="">Data:</label>
-                              <input value="<%=image.data%>" type="date" id="date" placeholder="Data" name="date" required>
-                         <% } %>
-                        <!-- se for transferência -->
-                         <% if (image.flag === "Depósito, Transferência ou PIX") { %>
-                              <label for="">Conta Bancaria Recebedora:</label>
-                              <input value="<%=image.conta%>" type="text" id="conta" placeholder="Conta Bancaria Recebedora" name="conta">
-                         <% } %>
-
-                        <!-- se for cartao -->
-                         <% if (image.tipo === "cartao") { %>
-                              <label for="">Vda:</label>
-                              <input value="<%=image.vda%>" type="text" id="vda" placeholder="Vda" name="vda">
-
-                              <label for="">Número da Parcela:</label>
-                              <input value="<%=image.nun_parcela%>" type="text" id="nun_parcela" placeholder="Número da Parcela" name="nun_parcela">
-
-                              <label for="">Tipo de Cartão:</label>
-                              <select name="tipo_cartao" id="tipo_cartao" required>
-                                  <% if (image.tipo_cartao === "credito") { %>
-                                      <option value="credito" selected>Crédito</option>
-                                      <option value="debito">Débito</option>
-                                  <% } %>
-                                  <% if (image.tipo_cartao === "debito") { %>
-                                      <option value="credito" selected>Crédito</option>
-                                      <option value="debito">Débito</option>
-                                  <% } %>
-                              </select>
-                         <% } %>
-
-                        <label for="">Nome:</label>
-                        <input value="<%=image.nome%>" type="text" id="nome" placeholder="Nome" name="nome" required>
-                        
-                        <label for="">Descrição:</label>
-                        <input value="<%=image.material%>" type="text" id="material" placeholder="Descrição" name="material" required>
-                        
-                        <label for="">Valor:</label>
-                        <input value="<%=image.valor%>" type="text" onInput="mascaraMoeda(event);" id="valor" placeholder="Valor" name="valor" required>
-                        
-                        <label for="obs">Observações:</label>
-                        <textarea id="obs" name="obs"><%= image.obs %></textarea>
-                        
-                        <button class="btn btn-primary shadow d-block w-100" type="submit">Enviar</button>
-                        <input type="hidden" name="id" value="<%=image.id%>">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <a onclick="closeModal('<%=image.id%>55')" class="link-danger">Fechar</a>
-                </div>
+          <div class="modal-content">
+            <div class="modal-header center">
+              <h3><%= image.flag %></h3>
             </div>
+            <div class="modal-body center">
+              <form action="/doc" method="POST">
+                <label for="Lote">Lote:</label>
+                <input value="<%=image.nun_lote%>" type="text" id="lote" placeholder="Lote" name="lote">
+
+                <% if (image.flag === "Depósito, Transferência ou PIX") { %>
+                  <label for="">Conta Bancária Recebedora:</label>
+                  <input value="<%=image.conta%>" type="text" id="conta" placeholder="Conta Bancaria Recebedora" name="conta">
+                <% } %>
+
+                <% if (image.tipo === "cartao") { %>
+                  <label for="">Vda:</label>
+                  <input value="<%=image.vda%>" type="text" id="vda" placeholder="Vda" name="vda">
+                  <label for="">Número da Parcela:</label>
+                  <input value="<%=image.nun_parcela%>" type="text" id="nun_parcela" placeholder="Número da Parcela" name="nun_parcela">
+                  <label for="">Tipo de Cartão:</label>
+                  <select name="tipo_cartao" id="tipo_cartao" required>
+                    <option value="credito" <%= image.tipo_cartao === "credito" ? "selected" : "" %>>Crédito</option>
+                    <option value="debito"  <%= image.tipo_cartao === "debito"  ? "selected" : "" %>>Débito</option>
+                  </select>
+                <% } %>
+
+                <label for="">Nome:</label>
+                <input value="<%=image.nome%>" type="text" id="nome" placeholder="Nome" name="nome" required>
+
+                <label for="">Descrição:</label>
+                <input value="<%=image.material%>" type="text" id="material" placeholder="Descrição" name="material" required>
+
+                <%
+                  let valores = Array.isArray(image.valor) ? image.valor : [image.valor];
+                  if (valores.length === 1 && typeof valores[0] === 'string' && valores[0] && valores[0].includes(';')) {
+                    valores = valores[0].split(';').map(v => v.trim()).filter(v => v.length);
+                  } else { valores = valores.map(v => String(v ?? '').trim()).filter(v => v.length); }
+                  let datas = Array.isArray(image.data) ? image.data : [image.data];
+                  if (datas.length === 1 && typeof datas[0] === 'string' && datas[0] && datas[0].includes(';')) {
+                    datas = datas[0].split(';').map(d => d.trim()).filter(d => d.length);
+                  } else { datas = datas.map(d => String(d ?? '').trim()).filter(d => d.length); }
+                  const maxLen = Math.max(valores.length, datas.length, 1);
+                  while (valores.length < maxLen) valores.push('');
+                  while (datas.length   < maxLen) datas.push('');
+                %>
+
+                <div class="valores-container">
+                  <% for (let i = 0; i < Math.max(valores.length, datas.length); i++) { %>
+                    <div class="valor-item">
+                      <label>Valor:</label>
+                      <input value="<%= valores[i] %>" type="text" placeholder="Valor" class="valor-input"
+                             oninput="mascaraMoeda(event); atualizarHidden('<%= image.id %>55')">
+                      <label>Data:</label>
+                      <input value="<%= datas[i] %>" type="date" class="data-input"
+                             oninput="atualizarHidden('<%= image.id %>55')">
+                      <button type="button" class="btn" onclick="removerValor(this, '<%= image.id %>55')">Remover</button>
+                    </div>
+                  <% } %>
+                </div>
+
+                <div class="center" style="margin:8px 0;">
+                  <button type="button" class="btn" onclick="adicionarValor('<%= image.id %>55')">+ Adicionar valor/data</button>
+                </div>
+
+                <input type="hidden" name="valor" class="valor-hidden" value="">
+                <input type="hidden" name="date"  class="datas-hidden" value="">
+                <label for="obs">Observações:</label>
+                <textarea id="obs" name="obs"><%= image.obs %></textarea>
+
+                <button class="btn btn-primary shadow d-block w-100" type="submit">Enviar</button>
+                <input type="hidden" name="id" value="<%=image.id%>">
+              </form>
+            </div>
+            <div class="modal-footer">
+              <a onclick="closeModal('<%=image.id%>55')" class="link-danger">Fechar</a>
+            </div>
+          </div>
         </div>
-        <!-- Close Modal -->
-    <% }) %>
+      <% }) %>
+    </tbody>
   </table>
 
+  <!-- ===== Template do Ticket (fora da tela) ===== -->
+  <div id="ticketCanvas">
+    <div id="ticket" class="ticket">
+      <div class="brand">
+        <div class="logo"><img src="assets/img/iasdfavicon.png" alt="" width="38" height="38"></div>
+        <div>
+          <div><strong id="tk-org">Associação Sul-Mato-Grossense</strong></div>
+          <div class="addr" id="tk-addr">Rua Armando de Oliveira, 135 • Campo Grande/MS<br/>CNPJ 07.121.135/0003-16</div>
+        </div>
+      </div>
+
+      <div class="title">RECIBO</div>
+      <div class="sub" id="tk-num-data">Nº — • —</div>
+      <div class="sep"></div>
+
+      <div class="row"><div class="label">Recebemos de:</div><div class="value" id="tk-nome">—</div></div>
+      <div class="row"><div class="label">Referente a:</div><div class="value" id="tk-ref">—</div></div>
+
+      <div class="box">
+        <h4>Itens</h4>
+        <table>
+          <thead><tr><th>Descrição</th><th class="qty">Qtde</th><th class="price">V. Unit.</th><th class="total">Total</th></tr></thead>
+          <tbody id="tk-itens"><tr><td>—</td><td class="qty">1</td><td class="price">—</td><td class="total">—</td></tr></tbody>
+          <tfoot>
+            <tr><td colspan="3" style="text-align:right;">Total Pago</td><td class="total" id="tk-total">—</td></tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="row"><div class="label">Forma de pagamento:</div><div class="value" id="tk-flag">—</div></div>
+      <div class="paid">PAGO</div>
+      <div class="sep"></div>
+
+      <div class="barcode" style="background:none; height:auto; display:flex; flex-direction:column; align-items:center; gap:6px;">
+        <div id="tk-qrcode"></div>
+        <small id="tk-barcode">—</small>
+      </div>
+
+      <div class="sign"><div class="line"></div>*Este recibo não é valido para tesouraria de igrejas, para esse fim solicite o recibo contábil.</div>
+    </div>
+  </div>
+
 <script>
-    function openModal(id) {
-      const modal = document.getElementById(id);
-      if (modal) {
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-      }
+  // ===== helpers =====
+  function mascaraMoeda(event) {
+    const onlyDigits = event.target.value.split("").filter(s => /\d/.test(s)).join("").padStart(3, "0");
+    const digitsFloat = onlyDigits.slice(0, -2) + "." + onlyDigits.slice(-2);
+    event.target.value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(digitsFloat);
+  }
+  function maskBRL(n){ return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n||0); }
+  function parseCurrencyBRStringList(txt){
+    if(!txt) return { list:[], total:0 };
+    const parts = String(txt).split(';').map(s=>s.trim()).filter(Boolean);
+    const nums = parts.map(p=>{
+      const n = p.replace(/[^\d,-]/g,'').replace(/\./g,'').replace(',','.');
+      const v = parseFloat(n); return isNaN(v)?0:v;
+    });
+    const total = nums.reduce((a,b)=>a+b,0);
+    return { list: parts, total };
+  }
+  const fmtDataBR = (s)=>{
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+      const [y,m,d]=s.split('-'); return `${d}/${m}/${y}`;
     }
+    return s || '';
+  };
 
-    function closeModal(id) {
-      const modal = document.getElementById(id);
-      if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }
-    }
-
-    // Fecha modal ao clicar fora do conteúdo
-    window.onclick = function(event) {
-      const modals = document.querySelectorAll('.modal');
-      modals.forEach(modal => {
-        if (event.target === modal) {
-          modal.style.display = "none";
-          document.body.style.overflow = 'auto';
-        }
-      });
-    }
-
-  //Função única para atualizar os IDs marcados
-  function atualizarCheckInput() {
-    const marcados = Array.from(document.querySelectorAll("input[type=checkbox][name=checkItem]:checked"))
-      .map(cb => cb.id.replace("check", "")); // ou cb.value
-    document.getElementById("checkinput").value = marcados.join(",");
-    console.log("IDs marcados:", marcados);
+  // ===== modal open/close =====
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) { modal.style.display = 'block'; document.body.style.overflow = 'hidden'; atualizarHidden(id); }
+  }
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
+  }
+  window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => { if (event.target === modal) { modal.style.display = "none"; document.body.style.overflow = 'auto'; } });
   }
 
-  //Marcar/Desmarcar todos os checkboxes
-  document.getElementById("checkAll").addEventListener("change", function () {
-    const checkboxes = document.querySelectorAll("input[type=checkbox][name=checkItem]");
-    checkboxes.forEach(cb => cb.checked = this.checked);
-    document.getElementById("checkAllLabel").innerText = this.checked ? "Desmarcar todos" : "Marcar todos";
+  // ===== seleção em lote (só linhas visíveis) =====
+  function atualizarCheckInput() {
+    const marcados = Array.from(
+      document.querySelectorAll("input[type=checkbox][name=checkItem]:checked")
+    ).map(cb => cb.id.replace("check",""));
+    document.getElementById("checkinput").value = marcados.join(",");
+  }
+  function linhasVisiveis() {
+    return Array.from(document.querySelectorAll("#tabela tbody tr"))
+      .filter(tr => tr.style.display !== "none");
+  }
+  function marcarVisiveis(marcar) {
+    linhasVisiveis().forEach(tr => {
+      const cb = tr.querySelector('input[type=checkbox][name=checkItem]');
+      if (cb) cb.checked = !!marcar;
+    });
     atualizarCheckInput();
+    document.getElementById("checkAllLabel").innerText = marcar ? "Desmarcar todos" : "Marcar todos";
+  }
+  document.getElementById("checkAll").addEventListener("change", function () {
+    marcarVisiveis(this.checked);
   });
-
-  //Um único listener para qualquer mudança em checkbox individual
   document.addEventListener("change", function(event) {
-    if (event.target.name === "checkItem") {
-      atualizarCheckInput();
-    }
+    if (event.target.name === "checkItem") atualizarCheckInput();
   });
 
+  // ===== valores + datas (escopo por modal) =====
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function adicionarValor(modalId) {
+    const modal = document.getElementById(modalId); if (!modal) return;
+    const container = modal.querySelector('.valores-container');
+    const div = document.createElement('div');
+    div.className = 'valor-item';
+    div.innerHTML = `
+      <label>Valor:</label>
+      <input type="text" placeholder="Valor" class="valor-input" oninput="mascaraMoeda(event); atualizarHidden('${modalId}')">
+      <label>Data:</label>
+      <input type="date" class="data-input" oninput="atualizarHidden('${modalId}')">
+      <button type="button" class="btn" onclick="removerValor(this, '${modalId}')">Remover</button>
+    `;
+    container.appendChild(div);
+    div.querySelector('.data-input').value = todayISO();
+    atualizarHidden(modalId);
+  }
+  function removerValor(btn, modalId) {
+    const item = btn.closest('.valor-item'); if (item) item.remove();
+    atualizarHidden(modalId);
+  }
+  function atualizarHidden(modalId) {
+    const modal = document.getElementById(modalId); if (!modal) return;
+    const itens = Array.from(modal.querySelectorAll('.valor-item'));
+    const valores = [], datas = [];
+    itens.forEach(item => {
+      const v = (item.querySelector('.valor-input')?.value || '').trim();
+      const d = (item.querySelector('.data-input')?.value  || '').trim();
+      valores.push(v); datas.push(d);
+    });
+    const hiddenValores = modal.querySelector('.valor-hidden');
+    const hiddenDatas   = modal.querySelector('.datas-hidden');
+    if (hiddenValores) hiddenValores.value = valores.join('; ');
+    if (hiddenDatas)   hiddenDatas.value   = datas.join('; ');
+  }
+
+  // ===== Filtros e Ordenação =====
+  (function(){
+    const table = document.getElementById('tabela');
+    const tbody = table.querySelector('tbody');
+    const headers = Array.from(table.querySelectorAll('thead tr:first-child th'));
+    const filterInputs = Array.from(table.querySelectorAll('thead tr.filters th input'));
+    let sortState = { col: 2, dir: 'desc' };
+
+    const parseCurrencyBR = (txt) => {
+      if (!txt) return NaN;
+      const first = String(txt).split(';')[0];
+      const n = first.replace(/[^\d,-]/g,'').replace(/\./g,'').replace(',', '.');
+      const v = parseFloat(n);
+      return isNaN(v) ? NaN : v;
+    };
+    const parseDateFlexible = (txt) => {
+      if (!txt) return NaN;
+      const first = String(txt).split(';')[0].trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(first)) return new Date(first).getTime();
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(first)) {
+        const [d,m,y] = first.split('/'); return new Date(`${y}-${m}-${d}`).getTime();
+      }
+      const t = new Date(first).getTime(); return isNaN(t) ? NaN : t;
+    };
+    const getColType = (idx) => (idx===2?'date': idx===6?'money':'text');
+    const cmp = (a,b,idx,dir)=>{
+      const ta=a.cells[idx].innerText.trim(), tb=b.cells[idx].innerText.trim();
+      let va,vb; const type=getColType(idx);
+      if(type==='money'){ va=parseCurrencyBR(ta); vb=parseCurrencyBR(tb); }
+      else if(type==='date'){ va=parseDateFlexible(ta); vb=parseDateFlexible(tb); }
+      else { va=ta.toLowerCase(); vb=tb.toLowerCase(); }
+      if (va<vb) return dir==='asc'?-1:1;
+      if (va>vb) return dir==='asc'?1:-1;
+      return 0;
+    };
+    const applySort = ()=>{
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort((ra,rb)=>cmp(ra,rb,sortState.col,sortState.dir));
+      rows.forEach(r=>tbody.appendChild(r));
+      headers.forEach((th,i)=>{ th.classList.remove('sort-asc','sort-desc'); if(i===sortState.col) th.classList.add(sortState.dir==='asc'?'sort-asc':'sort-desc'); });
+      // se checkAll está ativo, mantém apenas visíveis marcados
+      const checkAll = document.getElementById('checkAll');
+      if (checkAll && checkAll.checked) marcarVisiveis(true);
+    };
+    const applyFilters = ()=>{
+      const values = filterInputs.map(inp=>inp?inp.value.toLowerCase():'');
+      Array.from(tbody.querySelectorAll('tr')).forEach(tr=>{
+        const tds = Array.from(tr.children);
+        const visible = values.every((val,i)=>{
+          if(!val) return true;
+          if(i===8) return true;
+          const cell=(tds[i]?.innerText||'').toLowerCase();
+          return cell.includes(val);
+        });
+        tr.style.display = visible ? '' : 'none';
+      });
+
+      // reaplica marcação só nos visíveis se o "marcar todos" estiver ativo
+      const checkAll = document.getElementById('checkAll');
+      if (checkAll && checkAll.checked) marcarVisiveis(true);
+    };
+    headers.forEach((th,i)=>{ if(i===8) return; th.classList.add('sortable'); th.addEventListener('click',()=>{ if(sortState.col===i){ sortState.dir=sortState.dir==='asc'?'desc':'asc'; } else { sortState.col=i; sortState.dir=(getColType(i)==='text')?'asc':'desc'; } applySort(); }); });
+    filterInputs.forEach(inp=>{ if(!inp||inp.disabled) return; inp.addEventListener('input', applyFilters); });
+    applySort();
+  })();
+
+  // ===== Baixar Recibo como Imagem =====
+  async function baixarRecibo(el){
+    const a = el;
+    const data = {
+      id: a.dataset.id || '',
+      lote: a.dataset.lote || '',
+      flag: a.dataset.flag || '',
+      data: a.dataset.data || '',
+      nome: a.dataset.nome || '',
+      material: a.dataset.material || '',
+      depto: a.dataset.depto || '',
+      valorStr: a.dataset.valor || '',
+      obs: a.dataset.obs || ''
+    };
+
+    // popula ticket
+    document.getElementById('tk-num-data').textContent = `Nº ${data.id} • ${fmtDataBR(data.data)}`;
+    document.getElementById('tk-nome').textContent = data.nome;
+    document.getElementById('tk-ref').textContent  = data.material;
+    document.getElementById('tk-flag').textContent = data.flag || '—';
+    document.getElementById('tk-barcode').textContent = `${String(data.id).padStart(8,'0')}`;
+
+    // gera QR Code do ID
+    const qrContainer = document.getElementById('tk-qrcode');
+    qrContainer.innerHTML = "";
+    new QRCode(qrContainer, { text: String(data.id), width: 80, height: 80 });
+
+    const itensBody = document.getElementById('tk-itens');
+    itensBody.innerHTML = '';
+
+    const { list, total } = parseCurrencyBRStringList(data.valorStr);
+    if(list.length){
+      list.forEach((v,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${data.material}${list.length>1?` (Parc. ${i+1})`:''}</td>
+                        <td class="qty">1</td>
+                        <td class="price">${v}</td>
+                        <td class="total">${v}</td>`;
+        itensBody.appendChild(tr);
+      });
+    }else{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${data.material}</td><td class="qty">1</td><td class="price">—</td><td class="total">—</td>`;
+      itensBody.appendChild(tr);
+    }
+    document.getElementById('tk-total').textContent = maskBRL(total);
+
+    const ticket = document.getElementById('ticket');
+    const canvas = await html2canvas(ticket, { scale: 3, backgroundColor: null, useCORS: true });
+    const link = document.createElement('a');
+    const nomeFile = `recibo_${(data.nome||'').replace(/\s+/g,'_')}_${String(data.id||'').slice(-6)}.png`;
+    link.download = nomeFile;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
 </script>
 </body>
 </html>

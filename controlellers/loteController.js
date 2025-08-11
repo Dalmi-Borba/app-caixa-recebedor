@@ -24,3 +24,18 @@ exports.postLote = async function(req, res, next){
     }
     res.redirect('/view');
 };
+
+
+exports.removeItemLotes = async function(req, res) {
+    if (!req.params.id) return res.status(400).json({ success: false, message: 'ID não informado.' });
+
+    const obj = {
+        nun_lote: '',
+    }
+
+    const doc = await imgModel.findByIdAndUpdate(req.params.id, obj);
+
+    if (!doc) return res.status(404).json({ success: false, message: 'Item não encontrado.' });
+
+    res.json({ success: true });  
+};
