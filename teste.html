@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Leitor Giroscópio</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 10px; background: #f4f4f4; }
+    h2 { margin-top: 0; }
+    #status { font-weight: bold; margin-bottom: 10px; }
+    #log { 
+      background: #fff; 
+      padding: 10px; 
+      border: 1px solid #ccc; 
+      height: 300px; 
+      overflow-y: auto; 
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+<h2>Leitor de Giroscópio com Envio para API</h2>
+<p id="status">Aguardando giroscópio...</p>
+<div id="log"></div>
+
+<a href="chrome://flags/#enable-generic-sensor-extra-classes">chrome://flags/#enable-generic-sensor-extra-classes</a>
+
+<script>
+const API_URL = "https://sua-api.com/giroscopio";
+const logContainer = document.getElementById("log");
+
+function addLog(msg) {
+  const time = new Date().toLocaleTimeString();
+  logContainer.innerText += `[${time}] ${msg}\n`;
+  logContainer.scrollTop = logContainer.scrollHeight; // scroll automático
+}
+
+if (window.DeviceOrientationEvent) {
+  window.addEventListener("deviceorientation", (event) => {
+    const data = {
+      alpha: event.alpha?.toFixed(2), // Z
+      beta: event.beta?.toFixed(2),   // Frente-trás
+      gamma: event.gamma?.toFixed(2), // Esquerda-direita
+      timestamp: Date.now()
+    };
+
+    document.getElementById("status").innerText = "Giroscópio ativo";
+    addLog(`Leitura: ${JSON.stringify(data)}`);
+
+    fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+    .then(res => {
+      if (res.ok) {
+        addLog(`✅ Enviado com sucesso para API`);
+      } else {
+        addLog(`⚠️ Erro ao enviar: ${res.status}`);
+      }
+    })
+    .catch(err => addLog(`❌ Falha na requisição: ${err}`));
+  });
+} else {
+  document.getElementById("status").innerText = "Giroscópio não suportado";
+  addLog("Este dispositivo não possui suporte a giroscópio.");
+}
+</script>
+</body>
+</html>

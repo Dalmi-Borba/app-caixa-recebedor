@@ -17,6 +17,7 @@ var imageSchema = new mongoose.Schema({
     nun_parcela: String,
     tipo_cartao: String,
     flag: String,
+    user: String,
     img:
     {
         name: String,

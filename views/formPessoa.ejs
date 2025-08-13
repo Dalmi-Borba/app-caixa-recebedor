@@ -42,7 +42,7 @@
     margin-left: 6px;
   }
   .valor-item .remover:hover {
-       filter: brightness(0.8);
+    filter: brightness(0.8);
   }
 </style>
 <body>
@@ -61,12 +61,6 @@
                   <legend>Comprovante | Extrato</legend>
                   <input class="" type="file" id="image" name="image" required>
               </fieldset>
-
-              <fieldset>
-                  <legend>Favorecido</legend>
-                  <input class="" type="text" id="nome" placeholder="Nome" name="nome" required>
-              </fieldset>
-
               <!-- REMOVIDO: Data de Recebimento global -->
 
               <fieldset>
@@ -108,16 +102,24 @@
                   </select>
               </fieldset>
 
-              <fieldset>
+              <fieldset style="width: 900px;">
                   <label for="valor-total">Valor Total:</label>
                   <input style="width: 100px;" type="text" id="valor-total" readonly>
                   <br><br>
 
                   <legend>Valores e Datas de Recebimento</legend>
-                  <div id="valores-container" style="width: 400px;">
+                  <div id="valores-container">
                     <div class="valor-item">
+                      <label>Pagador</label>
+                      <input style="width: 180px;" type="text" oninput="atualizarHidden()" placeholder="Pagador" class="pagador-input" required>
                       <label>Valor</label>
-                      <input style="width: 100px;" type="text" oninput="mascaraMoeda(event); atualizarHidden()" placeholder="Valor" class="valor-input" required>
+                      <input style="width: 120px;" type="text" oninput="mascaraMoeda(event); atualizarHidden()" placeholder="Valor" class="valor-input" required>
+                      <label for="data">Modalidade</label>
+                        <select style="width: 100px;" class="flag-input" required onchange="atualizarHidden()">
+                          <option value="dep">Depósito</option>
+                          <option value="trans">Transferência</option>
+                          <option value="pix">PIX</option>
+                        </select>
                       <label>Data</label>
                       <input style="width: 150px;" type="date" class="data-input" oninput="atualizarHidden()" required>
                       <span class="remover" onclick="removerValor(this)">❎</span>
@@ -126,10 +128,12 @@
 
                   <a style="color: blue;" onclick="adicionarValor()">+ Adicionar</a>
 
-                  <!-- Mantido: valores em string -->
+                  <!-- Hiddens alinhados por índice: pagador[i] ↔ valor[i] ↔ data[i] -->
+                  <input type="hidden" id="pagador-hidden" name="nome">
                   <input type="hidden" id="valor-hidden" name="valor">
-                  <!-- NOVO: datas em string (mesma ordem dos valores) -->
                   <input type="hidden" id="datas-hidden" name="date">
+                  <input type="hidden" id="flags-hidden"   name="flag"> 
+
               </fieldset>
 
               <fieldset>
@@ -141,106 +145,138 @@
 
               <input type="hidden" name="aprovacao" id="aprovacao" value="false">
               <input type="hidden" name="tipo" id="tipo" value="pessoa">
-              <input type="hidden" name="flag" id="flag" value="Depósito, Transferência ou PIX">
           </form>
         </div>
     </section>
+<script>
+  // Helpers
+  function todayISO() {
+    const d = new Date();
+    // Ajusta timezone local sem deslocar a data
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0,10);
+  }
 
-    <script>
-      // Helpers
-      function todayISO() {
-        return new Date().toISOString().slice(0,10);
+  function maskCurrency(valor, locale = 'pt-BR', currency = 'BRL') {
+    const num = Number(valor);
+    if (Number.isNaN(num)) return '';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(num);
+  }
+
+  function mascaraMoeda(event) {
+    const onlyDigits = event.target.value
+      .split("")
+      .filter(s => /\d/.test(s))
+      .join("")
+      .padStart(3, "0");
+    const digitsFloat = onlyDigits.slice(0, -2) + "." + onlyDigits.slice(-2);
+    // guarda como monetário BRL
+    event.target.value = maskCurrency(digitsFloat);
+  }
+
+  // Cria novo bloco pagador+valor+modalidade+data
+  function adicionarValor() {
+    const container = document.getElementById('valores-container');
+
+    const div = document.createElement('div');
+    div.classList.add('valor-item');
+
+    div.innerHTML = `
+      <label>Pagador</label>
+      <input style="width: 180px;" type="text" oninput="atualizarHidden()" placeholder="Pagador" class="pagador-input" required>
+      <label>Valor</label>
+      <input style="width: 120px;" type="text" oninput="mascaraMoeda(event); atualizarHidden()" placeholder="Valor" class="valor-input" required>
+      <label for="data">Modalidade</label>
+      <select style="width: 100px;" class="flag-input" required onchange="atualizarHidden()">
+        <option value="dep">Depósito</option>
+        <option value="trans">Transferência</option>
+        <option value="pix">PIX</option>
+      </select>
+      <label>Data</label>
+      <input style="width: 160px;" type="date" class="data-input" oninput="atualizarHidden()" required>
+      <span class="remover" onclick="removerValor(this)">❎</span>
+    `;
+
+    container.appendChild(div);
+
+    // Pré-preenche a data com hoje
+    const lastDate = div.querySelector('.data-input');
+    lastDate.value = todayISO();
+
+    atualizarHidden();
+  }
+
+  function removerValor(botao) {
+    const container = document.getElementById('valores-container');
+    if (container.children.length > 1) {
+      botao.parentElement.remove();
+      atualizarHidden();
+    }
+  }
+
+  // Atualiza strings hidden e o total
+  function atualizarHidden() {
+    const itens = Array.from(document.querySelectorAll('#valores-container .valor-item'));
+
+    const pagadores = [];
+    const valoresFormatados = [];
+    const datasFormatadas = [];
+    const flags = [];
+
+    let soma = 0;
+
+    itens.forEach(item => {
+      const pagador = (item.querySelector('.pagador-input')?.value || '').trim();
+      const valorStr = (item.querySelector('.valor-input')?.value || '').trim();
+      const dataStr  = (item.querySelector('.data-input')?.value  || '').trim();
+      const flagSel  = (item.querySelector('.flag-input')?.value  || '').trim();
+
+      // Empilha sempre por índice para manter alinhamento
+      pagadores.push(pagador);
+      valoresFormatados.push(valorStr);
+      datasFormatadas.push(dataStr);
+      flags.push(flagSel);
+
+      // Soma valor se houver número válido
+      if (valorStr) {
+        const num = Number(
+          valorStr
+            .replace('R$', '')
+            .replace(/\s/g, '')
+            .replace(/\./g, '')
+            .replace(',', '.')
+        );
+        if (!Number.isNaN(num)) soma += num;
       }
+    });
 
-      function maskCurrency(valor, locale = 'pt-BR', currency = 'BRL') {
-        return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(valor);
-      }
+    // Preenche hiddens para o backend
+    document.getElementById('pagador-hidden').value = pagadores.join('; ');
+    document.getElementById('valor-hidden').value   = valoresFormatados.join('; ');
+    document.getElementById('datas-hidden').value   = datasFormatadas.join('; ');
+    document.getElementById('flags-hidden').value   = flags.join('; ');
 
-      function mascaraMoeda(event) {
-        const onlyDigits = event.target.value
-          .split("")
-          .filter(s => /\d/.test(s))
-          .join("")
-          .padStart(3, "0");
-        const digitsFloat = onlyDigits.slice(0, -2) + "." + onlyDigits.slice(-2);
-        event.target.value = maskCurrency(digitsFloat);
-      }
+    // Exibe o total formatado em BRL
+    document.getElementById('valor-total').value = maskCurrency(soma);
+  }
 
-      // Cria novo bloco valor+data
-      function adicionarValor() {
-        const container = document.getElementById('valores-container');
+  // Garante atualização antes de enviar
+  (function init() {
+    const firstDate = document.querySelector('.data-input');
+    if (firstDate) firstDate.value = todayISO();
 
-        const div = document.createElement('div');
-        div.classList.add('valor-item');
+    // Se o primeiro select de modalidade já existe, garanta onchange
+    const firstFlag = document.querySelector('.flag-input');
+    if (firstFlag) firstFlag.addEventListener('change', atualizarHidden);
 
-        div.innerHTML = `
-          <label>Valor</label>
-          <input style="width: 100px;" type="text" oninput="mascaraMoeda(event); atualizarHidden()" placeholder="Valor" class="valor-input" required>
-          <label>Data</label>
-          <input style="width: 150px;" type="date" class="data-input" oninput="atualizarHidden()" required>
-          <span class="remover" onclick="removerValor(this)">❎</span>
-        `;
+    // Garante atualização inicial
+    atualizarHidden();
 
-        container.appendChild(div);
-
-        // Pré-preenche a data com hoje
-        const lastDate = div.querySelector('.data-input');
-        lastDate.value = todayISO();
-
-        atualizarHidden();
-      }
-
-      function removerValor(botao) {
-        const container = document.getElementById('valores-container');
-        if (container.children.length > 1) {
-          botao.parentElement.remove();
-          atualizarHidden();
-        }
-      }
-
-      // Atualiza strings hidden e o total
-      function atualizarHidden() {
-        const valorInputs = Array.from(document.querySelectorAll('.valor-input'));
-        const dataInputs  = Array.from(document.querySelectorAll('.data-input'));
-
-        // Coleta valores formatados (como exibidos) e também soma
-        const valoresFormatados = [];
-        let soma = 0;
-
-        valorInputs.forEach(input => {
-          const v = (input.value || '').trim();
-          if (v) {
-            valoresFormatados.push(v);
-            // normaliza: remove "R$", espaços, pontos de milhar e troca vírgula por ponto
-            const num = Number(
-              v.replace('R$', '')
-               .replace(/\s/g, '')
-               .replace(/\./g, '')
-               .replace(',', '.')
-            );
-            if (!Number.isNaN(num)) soma += num;
-          }
-        });
-
-        // Coleta datas no mesmo índice dos valores
-        const datasFormatadas = dataInputs.map(d => (d.value || '').trim());
-
-        // Grava nos hidden (mantém compatibilidade: valores em string)
-        document.getElementById('valor-hidden').value = valoresFormatados.join('; ');
-        document.getElementById('datas-hidden').value = datasFormatadas.join('; ');
-
-        // Exibe o total (sem formatação pra manter seu padrão atual; se quiser, formata)
-        document.getElementById('valor-total').value = soma.toFixed(2);
-      }
-
-      // Data padrão = hoje para o primeiro item
-      (function init() {
-        const firstDate = document.querySelector('.data-input');
-        if (firstDate) firstDate.value = todayISO();
-        atualizarHidden();
-      })();
-    </script>
-
+    // Garante que o hidden esteja sincronizado no submit
+    const form = document.querySelector('form');
+    form.addEventListener('submit', () => atualizarHidden());
+  })();
+</script>
     <%- include('./partials/auto_complete'); %>
     <%- include('./partials/script'); %>
 </body>

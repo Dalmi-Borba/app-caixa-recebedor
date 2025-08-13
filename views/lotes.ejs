@@ -97,134 +97,166 @@
   </script>
 
   <!-- Geração do CSV com suporte a múltiplos valores **e múltiplas datas** -->
-  <script>
-    function salvar() {
-      let texto = document.getElementById("texto").value;
-      let titulo = document.getElementById("titulo").value;
-      let blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
-      saveAs(blob, titulo + ".csv");
+<!-- Geração do CSV com suporte a múltiplos valores/nome/data/flag por índice -->
+<!-- Geração do CSV com múltiplos valores/nome/data/flag por índice -->
+<script>
+  function salvar() {
+    let texto = document.getElementById("texto").value;
+    let titulo = document.getElementById("titulo").value;
+    let blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
+    saveAs(blob, titulo + ".csv");
+  }
+
+  (function gerarTexto() {
+    const items = <%- JSON.stringify(items) %>;
+
+    // === Ajuste aqui os códigos contábeis usados no 1º campo ===
+    const CONTA_ATUAL = '1112001';        // mês corrente (ex.: Banco conta movimento)
+    const CONTA_MES_ANTERIOR = '[não identificado a regularizar]'; // mês anterior (ex.: Depósito a efetuar) ← ajuste se for outro
+
+    const hoje = new Date();
+    const curY = hoje.getFullYear();
+    const curM = hoje.getMonth() + 1;
+
+    // ===== Helpers =====
+    const sanitize = (str = "") =>
+      String(str).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    const limparValorParaCentavos = (v) =>
+      (String(v).replace(/[^\d]/g, "")) || "0";
+
+    function splitLista(v) {
+      if (Array.isArray(v)) {
+        return v.flatMap(x => String(x).split(";")).map(s => s.trim()).filter(Boolean);
+      }
+      if (typeof v === "string") {
+        return v.split(";").map(s => s.trim()).filter(Boolean);
+      }
+      return [];
     }
 
-    (function gerarTexto() {
-      const items = <%- JSON.stringify(items) %>;
-      var hoje = new Date();
-      var ano = hoje.getFullYear();
-      var mes = (hoje.getMonth() + 1).toString().padStart(2, '0');
-      var dia = hoje.getDate().toString().padStart(2, '0');
+    const normalizarValores = splitLista;
+    const normalizarDatas   = splitLista; // espera yyyy-mm-dd
+    const normalizarFlags   = splitLista; // 'pix' | 'trans' | 'dep'
+    const normalizarNomes   = splitLista;
 
-      // ===== Helpers =====
-      function sanitize(str = "") {
-        return String(str).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      }
+    function dataBR(iso = "") {
+      if (!iso) return "";
+      const d = String(iso).slice(0,10);
+      const [y,m,dd] = d.split("-");
+      if (!y||!m||!dd) return "";
+      return `${dd}/${m}/${y}`;
+    }
 
-      // Mantém apenas dígitos -> centavos. "R$ 1.234,56" => "123456"
-      function limparValorParaCentavos(v) {
-        const soDigitos = String(v).replace(/[^\d]/g, "");
-        return soDigitos || "0";
-      }
+    function ymFromISO(iso = "") {
+      const s = String(iso).slice(0,10);
+      const [y,m] = s.split("-");
+      return { y: Number(y)||0, m: Number(m)||0 };
+    }
 
-      // Aceita array, string com ';' ou único valor -> array de strings (valores)
-      function normalizarValores(valor) {
-        if (Array.isArray(valor)) {
-          return valor
-            .flatMap(v => String(v).split(";"))
-            .map(v => v.trim())
-            .filter(Boolean);
+    function isPrevMonth(y, m) {
+      let py = curY, pm = curM - 1;
+      if (pm === 0) { pm = 12; py = curY - 1; }
+      return (y === py && m === pm);
+    }
+
+    function competenciaStrFromISO(iso = "", fallbackY = curY, fallbackM = curM) {
+      const { y, m } = ymFromISO(iso);
+      const yy = y || fallbackY, mm = m || fallbackM;
+      return `${String(mm).padStart(2,'0')}/${String(yy)}`;
+    }
+
+    let textoFinal = "145111;União Centro Oeste Brasileira da I.A.S.D.\n";
+
+    items.forEach(image => {
+      const nomesLista   = normalizarNomes(image.nome);
+      const valoresLista = normalizarValores(image.valor);
+      const datasLista   = normalizarDatas(image.data);
+      const flagsLista   = normalizarFlags(image.flag);
+
+      if (valoresLista.length === 0) return;
+
+      const material = sanitize(image.material);
+      const matIns   = image.mat_ins === "mat" ? "Almox." : "Inscricao";
+      const conta_bancaria = image.conta ? image.conta : "";
+      const depto    = image.depto;
+
+      const pickByIndex = (lista, i) =>
+        lista.length === 0 ? "" : (lista.length === 1 ? lista[0] : (lista[i] || lista[lista.length - 1]));
+
+      valoresLista.forEach((valorStr, i) => {
+        const valorCent = limparValorParaCentavos(valorStr);
+
+        const dataISO   = pickByIndex(datasLista, i);
+        const dataBRstr = dataBR(dataISO);
+        const compStr   = competenciaStrFromISO(dataISO);
+        const { y, m }  = ymFromISO(dataISO);
+        const nomeI     = sanitize(pickByIndex(nomesLista, i));
+        const flagI     = (pickByIndex(flagsLista, i) || "").toLowerCase(); // 'pix'|'trans'|'dep'|''
+
+        const ehMesAnterior = y && m ? isPrevMonth(y, m) : false;
+
+        // === tipos especiais inalterados ===
+        if (image.tipo === "iasd") {
+          textoFinal += `1139090;22;10;0000;0A;${valorCent};N;"${matIns} ${material} ${compStr} - ${nomeI}";;;"";;\n`;
+          textoFinal += `4149510;99;10;${depto};0E;-${valorCent};N;"${matIns} ${material} ${compStr} - ${nomeI}";;;"";;\n`;
+          return;
         }
-        if (typeof valor === "string") {
-          return valor
-            .split(";")
-            .map(v => v.trim())
-            .filter(Boolean);
-        }
-        return [];
-      }
-
-      // Aceita array, string com ';' ou única -> array de strings (datas ISO yyyy-mm-dd)
-      function normalizarDatas(data) {
-        if (Array.isArray(data)) {
-          return data
-            .flatMap(d => String(d).split(";"))
-            .map(d => d.trim())
-            .filter(Boolean);
-        }
-        if (typeof data === "string") {
-          return data
-            .split(";")
-            .map(d => d.trim())
-            .filter(Boolean);
-        }
-        return [];
-      }
-
-      function dataBR(yyyy_mm_dd = "") {
-        if (!yyyy_mm_dd) return "";
-        const d = String(yyyy_mm_dd).slice(0, 10);
-        const [y, m, d2] = d.split("-");
-        if (!y || !m || !d2) return "";
-        return `${d2}/${m}/${y}`;
-      }
-      // =====================
-
-      let textoFinal = "145111;União Centro Oeste Brasileira da I.A.S.D.\n";
-
-      items.forEach(image => {
-        const nome = sanitize(image.nome);
-        const material = sanitize(image.material);
-        const matIns = image.mat_ins === "mat" ? "Almox." : "Inscricao";
-        const conta_bancaria = image.conta ? image.conta : "";
-
-        const valoresBrutos = normalizarValores(image.valor);
-        const datasBrutas   = normalizarDatas(image.data);
-
-        if (valoresBrutos.length === 0) return;
-
-        // Função para pegar a data correspondente ao índice do valor.
-        // Regra: se houver só 1 data, replica pra todos; se houver várias, usa a do mesmo índice;
-        // se faltar alguma posição, usa a última disponível.
-        function dataPorIndice(i) {
-          if (datasBrutas.length === 0) return "";                            // sem data -> vazio
-          if (datasBrutas.length === 1) return datasBrutas[0];                 // 1 data -> aplica em todos
-          return datasBrutas[i] || datasBrutas[datasBrutas.length - 1];        // fallback última
-        }
-
-        valoresBrutos.forEach((valorStr, i) => {
-          const valor = limparValorParaCentavos(valorStr); // em centavos, sem sinal
-          const dataLinhaBR = dataBR(dataPorIndice(i));    // dd/mm/yyyy
-
-          if (image.tipo === "iasd") {
-            textoFinal += `1139090;22;10;0000;0A;${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-            textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-
-          } else if (image.tipo === "cartao") {
-            if (image.tipo_cartao === "credito") {
-              let avista_parcelado = (image.nun_parcela === '1' || image.nun_parcela === '0') ? 'A Vista' : 'Parcelas';
-              let parc = (image.nun_parcela === '1' || image.nun_parcela === '0') ? '' : image.nun_parcela;
-              textoFinal += `2164025;1001;10;0000;0A;${valor};N;"Vda ${image.vda} - ${dataLinhaBR} - ${parc} ${avista_parcelado}";;;"";;\n`;
-              textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-            } else {
-              textoFinal += `2164025;1001;10;0000;0A;${valor};N;"Vda ${image.vda} - ${dataLinhaBR} -  A Vista";;;"";;\n`;
-              textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-            }
-
-          } else if (image.tipo === "func") {
-            textoFinal += `1135001;[CODIGO FUNCIONARIO];10;0000;0A;${valor};N;"Adto. ${mes}/${ano} - ${nome}";;;"";;\n`;
-            textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-
-          } else if (image.tipo === "caixa") {
-            textoFinal += `1111025;;10;0000;0A;${valor};N;"Deposito a Efetuar - ${mes}/${ano}";;;"";;\n`;
-            textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
-
+        if (image.tipo === "cartao") {
+          if (image.tipo_cartao === "credito") {
+            const avista_parcelado = (image.nun_parcela === '1' || image.nun_parcela === '0') ? 'A Vista' : 'Parcelas';
+            const parc = (image.nun_parcela === '1' || image.nun_parcela === '0') ? '' : image.nun_parcela;
+            textoFinal += `2164025;1001;10;0000;0A;${valorCent};N;"Vda ${image.vda} - ${dataBRstr} - ${parc} ${avista_parcelado}";;;"";;\n`;
+            textoFinal += `4149510;99;10;${depto};0E;-${valorCent};N;"${matIns} ${material} ${compStr} - ${nomeI}";;;"";;\n`;
           } else {
-            // Depósito/Transferência/PIX: usa a data por índice
-            textoFinal += `1112001;${conta_bancaria};10;0000;0A;${valor};N;"Transferencia Pix ${dataLinhaBR} - ${nome}";;;"";;\n`;
-            textoFinal += `4149510;99;10;${image.depto};0E;-${valor};N;"${matIns} ${material} ${mes}/${ano} - ${nome}";;;"";;\n`;
+            textoFinal += `2164025;1001;10;0000;0A;${valorCent};N;"Vda ${image.vda} - ${dataBRstr} -  A Vista";;;"";;\n`;
+            textoFinal += `4149510;99;10;${depto};0E;-${valorCent};N;"${matIns} ${material} ${compStr} - ${nomeI}";;;"";;\n`;
           }
-        });
-      });
+          return;
+        }
+        if (image.tipo === "func") {
+          textoFinal += `1135001;[CODIGO FUNCIONARIO];10;0000;0A;${valorCent};N;"Adto. ${compStr} - ${nomeI}";;;"";;\n`;
+          textoFinal += `4149510;99;10;${depto};0E;-${valorCent};N;"${matIns} ${material} ${compStr} - ${nomeI}";;;"";;\n`;
+          return;
+        }
+        if (image.tipo === "caixa") {
+          textoFinal += `1111025;;10;0000;0A;${valorCent};N;"Deposito a Efetuar - ${compStr}";;;"";;\n`;
+          textoFinal += `4149510;99;10;${depto};0E;-${valorCent};N;"${matIns} ${material} ${compStr} - ${nomeI}";;;"";;\n`;
+          return;
+        }
 
-      document.getElementById("texto").value = textoFinal;
-    })();
-  </script>
+        // === DEPÓSITO / TRANSFERÊNCIA / PIX ===
+        // 1) Descrição da 1ª linha (banco)
+        let descBanco;
+        switch (flagI) {
+          case "pix":
+            descBanco = `Transf.PIX ${dataBRstr}` + (nomeI ? ` - ${nomeI}` : "");
+            break;
+          case "trans":
+            descBanco = `Transf.Dia ${dataBRstr}` + (nomeI ? ` - ${nomeI}` : "");
+            break;
+          case "dep":
+            descBanco = `Depósito ${dataBRstr}`; // sem nome
+            break;
+          default:
+            descBanco = `PIX Transf.PIX ${dataBRstr}` + (nomeI ? ` - ${nomeI}` : "");
+        }
+
+        // 2) Conta contábil muda se for mês anterior
+        const contaContabil = ehMesAnterior ? CONTA_MES_ANTERIOR : CONTA_ATUAL;
+
+        // 1ª linha (banco): [conta contábil];[conta_bancaria];...
+        textoFinal += `${contaContabil};${conta_bancaria};10;0000;0A;${valorCent};N;"${descBanco}";;;"";;\n`;
+
+        // 2ª linha (contrapartida): competência pela DATA do índice
+        const descContra = `${matIns} ${material} ${compStr}` + (nomeI ? ` - ${nomeI}` : "");
+        textoFinal += `4149510;99;10;${depto};0E;-${valorCent};N;"${descContra}";;;"";;\n`;
+      });
+    });
+
+    document.getElementById("texto").value = textoFinal;
+  })();
+</script>
+
 </body>
 </html>
