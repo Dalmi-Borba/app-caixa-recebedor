@@ -44,6 +44,7 @@
     <a class="nav-link active" href="/">Home</a>
     <a class="nav-link" href="/view">Solicitações</a>
     <a class="nav-link" href="/movimentos">Movimentos</a>
+    <a class="nav-link" href="/filtrar">Filtros</a>
     <a class="nav-link" href="/config">Configurações</a>
   </div>
 
@@ -52,6 +53,7 @@
 
   <form class="center" action="/filtrar" method="POST">
     <input type="text" id="lote" name="lote" placeholder="Nome do Lote">
+    <input type="text" id="user" name="user" placeholder="Requisitante">
     <input type="text" id="flag" name="flag" placeholder="Tipo Lçto">
     <input type="date" id="data" name="data" placeholder="Data">
     <input type="text" id="nome" name="nome" placeholder="Nome">
@@ -71,6 +73,7 @@
       <thead>
         <tr>
           <th>Lote</th>
+          <th>Requisitante</th>
           <th>Tipo Lçto</th>
           <th>Data</th>
           <th>Nome</th>
@@ -86,6 +89,7 @@
           <% items.forEach(function(image) { %>
             <tr>
               <td><%= image.nun_lote %></td>
+              <td><%= image.user %></td>
               <td><%= image.flag %></td>
               <td><%= image.data %></td>
               <td><%= image.nome %></td>
@@ -97,10 +101,14 @@
                 <% if (image.img && image.img.name) { %>
                   <a href="#" onclick="openModal('<%= image.id %>')" class="link-primary">📎 Anexo</a>
                 <% } %>
+                <% if (image.arquivo_recibo === "true") { %>
+                  <a href="uploads/<%= image.nun_lote %>.pdf" target="_blank" class="link-primary">📎 Recibos</a>
+                  <a href="#" onclick="estornarLote('<%= image.id %>')" class="link-danger">❌ Estornar</a>
+                <% } %>
               </td>
             </tr>
 
-            <!-- Modal de anexo (mesmo padrão da outra página) -->
+            <!-- Modal de anexo -->
             <% if (image.img && image.img.name) { %>
               <div id="<%= image.id %>" class="modal">
                 <div class="modal-content">
@@ -123,7 +131,7 @@
               </div>
             <% } %>
 
-            <!-- Modal de edição (se você tiver) -->
+            <!-- Modal de edição  -->
             <div id="<%= image.id %>55" class="modal">
               <div class="modal-content">
                 <div class="modal-header center">
@@ -167,6 +175,26 @@
         if (e.target === m) { m.style.display = 'none'; document.body.style.overflow = 'auto'; }
       });
     });
+
+    // estornar lote
+    function estornarLote(id) {
+      if (confirm('Tem certeza que deseja estornar este lote?')) {
+        fetch(`/estornar/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then(response => response.json())
+          .then(response => {
+            if (response.success) {
+              location.reload();
+            } else {
+              alert('Ocorreu um erro ao estornar.');
+            }
+          });
+      }
+    }
   </script>
 </body>
 </html>

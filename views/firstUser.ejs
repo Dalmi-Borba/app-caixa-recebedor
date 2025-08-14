@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"><title>Primeiro usuário</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:Segoe UI,Arial,sans-serif;background:#f2f4f8;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+    form{background:#fff;padding:24px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);width:360px}
+    h3{margin:0 0 16px}
+    input{width:100%;padding:10px;margin:6px 0 12px;border:1px solid #ccc;border-radius:8px}
+    button{width:100%;padding:10px;border:0;border-radius:8px;background:#111;color:#fff;cursor:pointer}
+  </style>
+</head>
+<body>
+  <form method="post" action="/setup-first-user">
+    <h3>Criar primeiro usuário (admin)</h3>
+    <input required name="name" placeholder="Nome">
+    <input required type="email" name="email" placeholder="Email">
+    <input required type="password" name="password" placeholder="Senha">
+    <button type="submit">Criar</button>
+  </form>
+</body>
+</html>

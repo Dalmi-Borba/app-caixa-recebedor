@@ -1,16 +1,19 @@
 const imgModel = require('../models/model');
 
-exports.renderLotes = async function(req, res){
-    //pegar todos os itens com lote
-    await imgModel.find({nun_lote: { $nin: [null, ""] }}).sort({nome: 1}).exec(function(err, items){
-        if (err) {
-            console.log(err);
-            res.status(500).send('An error occurred', err);
-        }
-        else {
-            res.render('movimentos.ejs', { items: items });
-        }
-    });
+exports.renderLotes = async function(req, res) {
+    try {
+        const items = await imgModel.find({
+            nun_lote: { $nin: [null, ""] },
+            arquivo_recibo: false // garante que só traga os não recebidos
+        })
+        .sort({ nun_lote: -1 })
+        .exec();
+
+        res.render('movimentos.ejs', { items });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Erro ao buscar lotes');
+    }
 };
 
 exports.postLote = async function(req, res, next){

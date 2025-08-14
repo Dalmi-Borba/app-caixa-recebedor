@@ -1,15 +1,17 @@
 const imgModel = require('../models/model');
+const user = require('../models/user');
 
 exports.renderFiltros = async function(req, res){
    res.render('filtros.ejs', { items: [] });
 };
 
 exports.postFiltros = async function (req, res) {
-    const { lote, flag, data, nome, material, depto, valor, obs } = req.body;
+    const { lote, user, flag, data, nome, material, depto, valor, obs } = req.body;
 
     // objeto de filtros só com campos preenchidos
     const filtros = {};
     if (lote) filtros.nun_lote = new RegExp(lote, 'i'); // busca parcial, case-insensitive
+    if (user) filtros.user = new RegExp(user, 'i');
     if (flag) filtros.flag = new RegExp(flag, 'i');
     if (data) filtros.data = data;
     if (nome) filtros.nome = new RegExp(nome, 'i');

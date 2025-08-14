@@ -3,9 +3,8 @@ const bancModel = require('../models/config_banc');
 const descModel = require('../models/config_descricao');
 const deptoModel = require('../models/config_depto');
 const convert = require('../convert');
-const delete_js = require('../delete_js');
-const zipjs = require('../zip_js')
 let path = require('path');
+const user = require('../models/user');
 require('dotenv').config();
 
 exports.renderLotes = async function(req, res){
@@ -32,17 +31,6 @@ exports.renderLotes = async function(req, res){
             res.render('lotes.ejs', { items: items, path_public: path_public });
         }
     });
-};
-
-exports.renderDown = function(req, res){
-    res.download('./zip/nome.zip', function(error){
-        //console.log("Error : ", error)
-    });
-};
-
-exports.renderAnexos = function(req, res){
-    res.render('anexos.ejs');
-    zipjs(req.params.id);
 };
 
 exports.renderFormPessoa = async function(req, res){    
@@ -175,6 +163,8 @@ exports.postImage = async function(req, res, next){
         nun_parcela: req.body.nun_parcela,
         tipo_cartao: req.body.tipo_cartao,
         flag: req.body.flag,
+        user: req.user.name,
+        arquivo_recibo: false,
         img: {
             name: req.file.filename,
             //data: fs.readFileSync(path.join('/home/dalmi/Documentos/projetos/multer/uploads/' + req.file.filename)),
@@ -207,6 +197,8 @@ exports.postCaixa = async function(req, res, next){
         valor: req.body.valor,
         obs: req.body.obs,
         flag: req.body.flag,
+        user: req.user.name,
+        arquivo_recibo: false,
     }
     imgModel.create(obj, (err, item) => {
         if (err) {
@@ -227,18 +219,7 @@ exports.delete = async function(req, res) {
     const doc = await imgModel.findByIdAndRemove({ _id: req.params.id});
     if(!doc) return res.render('404');
 
-    //delete_js(req.params.name),
-  
-    res.redirect('/view');
-};
-
-exports.del = async function(req, res) {
-    if(!req.params.id) return res.render('404');
-  
-    const doc = await imgModel.findByIdAndRemove({ _id: req.params.id});
-    if(!doc) return res.render('404');
-  
-    res.redirect('/view');
+    res.json({ success: true }); 
 };
 
 exports.update = async function(req, res) {

@@ -175,12 +175,18 @@
 <body>
 
   <div class="navbar">
-    <a href="/">Home</a>
-    <a href="/view">Solicitações</a>
-    <a href="/movimentos">Movimentos</a>
+    <a class="nav-link active" href="/">Home</a>
+    <a class="nav-link" href="/view">Solicitações</a>
+    <a class="nav-link" href="/movimentos">Movimentos</a>
     <a class="nav-link" href="/filtrar">Filtros</a>
+    <a class="nav-link" href="/config">Configurações</a>
   </div>
 
+  <% if (items.length === 0) { %>
+    <div class="center">
+      <h3>Nenhum registro encontrado</h3>
+    </div>
+  <% }%>
   <div class="arvore-lote">
     <% 
       const lotes = {};
@@ -197,6 +203,11 @@
           <form action="/lotes" method="POST">
             <input type="text" id="lote" name="lote" value="<%= lote %>" hidden>
             <button class="btn btn-primary shadow d-block w-100" type="submit">Baixar CSV</button>
+          </form>
+          <form action="/upload-recibos" method="POST" enctype="multipart/form-data">
+            <input type="text" id="lote" name="lote" value="<%= lote %>" hidden required>
+            <input type="file" name="recibos" accept="application/pdf" id="recibos" required>
+            <button class="btn btn-primary shadow d-block w-100" type="submit">Enviar Recibos</button>
           </form>
         </div>
         <div>

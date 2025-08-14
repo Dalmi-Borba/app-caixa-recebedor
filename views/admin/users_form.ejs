@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"><title><%= mode==='create'?'Novo usuário':'Editar usuário' %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:Segoe UI,Arial,sans-serif;background:#f6f7fb;padding:24px}
+    form{background:#fff;max-width:420px;margin:0 auto;padding:20px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    label{display:block;margin-top:10px;font-size:13px;color:#555}
+    input,select{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:8px}
+    .row{display:flex;gap:10px}
+    button{margin-top:16px;width:100%;padding:10px;border:0;border-radius:8px;background:#111;color:#fff;cursor:pointer}
+    .err{color:#b00020;margin-bottom:8px}
+    a{display:inline-block;margin:12px 0}
+  </style>
+</head>
+<body>
+  <form method="post" action="<%= mode==='create' ? '/admin/users' : ('/admin/users/' + userDoc._id) %>">
+    <h2><%= mode==='create'?'Novo usuário':'Editar usuário' %></h2>
+    <% if (error) { %><div class="err"><%= error %></div><% } %>
+
+    <label>Nome</label>
+    <input name="name" value="<%= userDoc ? userDoc.name : '' %>" required>
+
+    <label>E-mail</label>
+    <input type="email" name="email" value="<%= userDoc ? userDoc.email : '' %>" required>
+
+    <div class="row">
+      <div style="flex:1">
+        <label>Papel</label>
+        <select name="role">
+          <option value="user" <%= (userDoc && userDoc.role==='user')?'selected':'' %>>user</option>
+          <option value="admin" <%= (userDoc && userDoc.role==='admin')?'selected':'' %>>admin</option>
+        </select>
+      </div>
+      <div style="flex:1">
+        <label><%= mode==='create'?'Senha':'Nova senha (opcional)' %></label>
+        <input type="password" name="password" <%= mode==='create'?'required':'' %> placeholder="<%= mode==='edit'?'Deixe em branco para manter':'' %>">
+      </div>
+    </div>
+
+    <button type="submit"><%= mode==='create'?'Criar usuário':'Salvar alterações' %></button>
+    <a href="/admin/users">Voltar</a>
+  </form>
+</body>
+</html>
